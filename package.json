@@ -7,13 +7,15 @@
     "dev": "ts-node -r tsconfig-paths/register src/index.ts",
     "build": "tsc",
     "start": "node -r module-alias/register dist/index.js",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test:connection:stellar": "ts-node -r tsconfig-paths/register src/test/stellar/test-connection.ts"
   },
   "keywords": [],
   "author": "Josué Araya",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@stellar/stellar-sdk": "^13.3.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
