@@ -8,7 +8,9 @@
     "build": "tsc",
     "start": "node -r module-alias/register dist/index.js",
     "clean": "rm -rf dist",
-    "test:connection:stellar": "ts-node -r tsconfig-paths/register src/test/stellar/test-connection.ts"
+    "test:connection:stellar": "ts-node -r tsconfig-paths/register src/test/stellar/test-connection.ts",
+    "test:transaction:stellar": "npx ts-node -r tsconfig-paths/register src/test/stellar/test-transaction-history.ts"
+
   },
   "keywords": [],
   "author": "Josué Araya",
@@ -19,7 +21,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "module-alias": "^2.2.3"
+    "module-alias": "^2.2.3",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.18",
