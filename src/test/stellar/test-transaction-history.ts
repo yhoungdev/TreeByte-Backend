@@ -4,7 +4,7 @@ import { STELLAR_CONFIG } from '@/config/stellar-config';
 const server = new Horizon.Server(STELLAR_CONFIG.horizonURL);
 
 
-const publicKey = 'GBRPYHIL2CI3N36JQU7ZL4CAY4H3VKPVF5ZSYLUMT5Y...';
+const publicKey = 'GASAEA7TGN3JPAORQSK7FLK4ERCQMYY4PA5UETV3NGLBJMCPIFVNH4QX'; 
 
 (async () => {
   console.log("\n🔍 Transaction History Test");

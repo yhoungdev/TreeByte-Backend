@@ -21,5 +21,6 @@
 ❌ **Failure case:** Returns an error if the account doesn't exist or if base fee fetching fails.
 📎 **Note:** This test does not sign or submit the transaction; it only builds and logs the XDR for inspection.
 🔑 **Requirement:** A valid source public key on the Stellar testnet (with at least 1 XLM balance).
+📦 **Script added in package.json:** `test:transaction:stellar`
 
 ---
