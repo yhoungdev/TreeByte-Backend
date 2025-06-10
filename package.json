@@ -9,7 +9,8 @@
     "start": "node -r module-alias/register dist/index.js",
     "clean": "rm -rf dist",
     "test:connection:stellar": "ts-node -r tsconfig-paths/register src/test/stellar/test-connection.ts",
-    "test:transaction:stellar": "npx ts-node -r tsconfig-paths/register src/test/stellar/test-transaction-history.ts"
+    "test:transaction:stellar": "npx ts-node -r tsconfig-paths/register src/test/stellar/test-transaction-history.ts",
+    "test:nft:stellar": "ts-node -r tsconfig-paths/register src/test/stellar/test-nft.ts"
 
   },
   "keywords": [],
