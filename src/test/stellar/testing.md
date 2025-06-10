@@ -24,3 +24,28 @@
 📦 **Script added in package.json:** `test:transaction:stellar`
 
 ---
+
+### 🌱 NFT Generation Test
+
+📍 **Path:** `src/test/stellar/test-nft.ts`
+💻 **Command:** `npm run test:nft:stellar`
+🛠️ **Purpose:** Simulates minting a unique token ("NFT") on the Stellar testnet. It creates issuer and recipient accounts, funds them, sets a trustline, and issues one unit of a custom asset.
+✅ **Expected result:** A token with a unique code is issued and appears in the recipient's balance.
+❌ **Failure case:** Trustline not set, account funding failed, or transaction rejected by the network.
+📎 **Note:** Asset code must be ≤12 characters; uses random suffix to ensure uniqueness.
+📦 **Script added in package.json:** `test:nft:stellar`
+
+---
+
+### 🛒 NFT Purchase Test
+
+📍 **Path:** `src/test/stellar/test-purchase-nft.ts`
+💻 **Command:** `npm run test:purchase:nft`
+🛠️ **Purpose:** Validates the full flow of purchasing a unique token (NFT) using XLM. It involves trustline setup, NFT minting, and a transaction where the buyer pays in XLM and receives the asset.
+✅ **Expected result:** NFT is transferred to the buyer and their balance reflects ownership; transaction hash is displayed.
+❌ **Failure case:** Missing trustline, insufficient funds, or missing buyer signature.
+🔐 **Requirement:** Both `issuerSecret` and `buyerSecret` are used to sign the transaction.
+📦 **Script added in package.json:** `test:purchase:nft`
+
+---
+
