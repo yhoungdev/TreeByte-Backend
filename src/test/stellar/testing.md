@@ -49,3 +49,14 @@
 
 ---
 
+🔐 Registration + Funding Test
+📍 Path: src/test/stellar/test-auth-register.ts
+💻 Command: npm run test:register
+🛠️ Purpose: Simulates registering a user via /auth/register, then funds the generated Stellar public key using Friendbot. Also validates connectivity to Horizon and confirms account balances.
+✅ Expected result: Returns 201 Created with email + public key, and shows XLM balance from the funded testnet account.
+❌ Failure case: Returns 500 if the server crashes (e.g., SDK import error), 400 if registration input is invalid, or funding fails.
+📎 Note: Parses the backend response manually to avoid double-read errors. Uses random email per test run.
+📦 Script added in package.json: test:register
+
+---
+
