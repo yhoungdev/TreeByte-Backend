@@ -11,8 +11,8 @@
     "test:connection:stellar": "ts-node -r tsconfig-paths/register src/test/stellar/test-connection.ts",
     "test:transaction:stellar": "npx ts-node -r tsconfig-paths/register src/test/stellar/test-transaction-history.ts",
     "test:nft:stellar": "ts-node -r tsconfig-paths/register src/test/stellar/test-nft.ts",
-    "test:purchase:nft": "ts-node -r tsconfig-paths/register src/test/stellar/test-purchase-nft.ts"
-
+    "test:purchase:nft": "ts-node -r tsconfig-paths/register src/test/stellar/test-purchase-nft.ts",
+    "test:register": "ts-node -r tsconfig-paths/register src/test/stellar/test-auth-register.ts"
   },
   "keywords": [],
   "author": "Josué Araya",
@@ -24,12 +24,15 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "module-alias": "^2.2.3",
+    "node-fetch": "^3.3.2",
+    "undici": "^7.10.0",
     "winston": "^3.17.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
     "@types/node": "^22.15.30",
+    "@types/node-fetch": "^2.6.12",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",

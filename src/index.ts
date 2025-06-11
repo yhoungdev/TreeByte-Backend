@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import treeRoutes from './routes/tree.routes';
 import transactionHistoryRoutes from './routes/transaction-history.routes'; 
 import healthRoutes from '@/routes/health.routes';
+import authRoutes from '@/routes/auth.routes'; 
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use('/api/trees', treeRoutes);
 app.use('/api/history', transactionHistoryRoutes); 
 app.use('/api/health', healthRoutes);
+app.use('/auth', authRoutes); 
 
 app.get('/', (_req, res) => {
   res.send('TreeByte API is running 🌱');
@@ -29,4 +31,3 @@ app.listen(PORT, () => {
   console.log('🌱 Planting trust, one tree at a time.');
   console.log('🌳 Backend running...');
 });
-
