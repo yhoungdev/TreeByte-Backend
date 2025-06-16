@@ -19,7 +19,6 @@ export const createWallet = (req: Request, res: Response) => {
     const secretKey = pair.secret();
     const encryptedSecret = encrypt(secretKey);
 
-    // Guardar en base de datos si aplica
     res.status(201).json({ publicKey });
   } catch (error) {
     res.status(500).json({ error: 'Failed to create wallet.' });
