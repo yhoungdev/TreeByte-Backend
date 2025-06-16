@@ -8,7 +8,7 @@ import treeRoutes from './routes/tree.routes';
 import transactionHistoryRoutes from './routes/transaction-history.routes'; 
 import healthRoutes from '@/routes/health.routes';
 import authRoutes from '@/routes/auth.routes'; 
-
+import walletRoutes from '@/routes/wallets.routes';
 dotenv.config();
 
 const app = express();
@@ -21,6 +21,7 @@ app.use('/api/trees', treeRoutes);
 app.use('/api/history', transactionHistoryRoutes); 
 app.use('/api/health', healthRoutes);
 app.use('/auth', authRoutes); 
+app.use('/wallet', walletRoutes);
 
 app.get('/', (_req, res) => {
   res.send('TreeByte API is running 🌱');
