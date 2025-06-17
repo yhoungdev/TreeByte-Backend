@@ -1,6 +1,10 @@
 import { Router } from 'express';
-import { createWallet } from '../controllers/wallet.controller';
+const { createWallet } = require('../controllers/wallet.controller');
 
 const router = Router();
+console.log('[router] Wallet routes loaded');
+
 router.post('/create', createWallet);
+console.log('[router] Wallet routes loaded');
+
 export default router;
