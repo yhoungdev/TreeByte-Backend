@@ -20,19 +20,22 @@
   "type": "commonjs",
   "dependencies": {
     "@stellar/stellar-sdk": "^13.3.0",
+    "@supabase/supabase-js": "^2.50.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "module-alias": "^2.2.3",
     "node-fetch": "^3.3.2",
+    "pg": "^8.16.0",
     "undici": "^7.10.0",
     "winston": "^3.17.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.18",
-    "@types/express": "^5.0.2",
+    "@types/express": "^5.0.3",
     "@types/node": "^22.15.30",
     "@types/node-fetch": "^2.6.12",
+    "@types/pg": "^8.15.4",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
