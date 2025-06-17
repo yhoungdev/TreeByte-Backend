@@ -21,7 +21,7 @@ app.use('/api/trees', treeRoutes);
 app.use('/api/history', transactionHistoryRoutes); 
 app.use('/api/health', healthRoutes);
 app.use('/auth', authRoutes); 
-app.use('/wallet', walletRoutes);
+app.use('/api/wallet', walletRoutes);
 
 app.get('/', (_req, res) => {
   res.send('TreeByte API is running 🌱');
