@@ -26,6 +26,7 @@
     "express": "^5.1.0",
     "module-alias": "^2.2.3",
     "node-fetch": "^3.3.2",
+    "nodemailer": "^7.0.3",
     "pg": "^8.16.0",
     "undici": "^7.10.0",
     "winston": "^3.17.0"
@@ -35,6 +36,7 @@
     "@types/express": "^5.0.3",
     "@types/node": "^22.15.30",
     "@types/node-fetch": "^2.6.12",
+    "@types/nodemailer": "^6.4.17",
     "@types/pg": "^8.15.4",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
