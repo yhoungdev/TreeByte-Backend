@@ -1,6 +1,6 @@
 import { Horizon, Keypair, Asset, TransactionBuilder, Operation } from '@stellar/stellar-sdk';
 import { STELLAR_CONFIG } from '@/config/stellar-config';
-import { generateUniqueToken } from '@/services/generate-unique-token';
+import { generateUniqueToken } from '@/services/generate-unique-token.service';
 
 const server = new Horizon.Server(STELLAR_CONFIG.horizonURL);
 

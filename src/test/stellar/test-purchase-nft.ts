@@ -1,6 +1,6 @@
 import { Keypair, Asset, TransactionBuilder, Operation, Horizon } from '@stellar/stellar-sdk';
 import { STELLAR_CONFIG } from '@/config/stellar-config';
-import { purchaseNFT } from '@/services/purchase-nft';
+import { purchaseNFT } from '@/services/purchase-nft.service';
 
 const server = new Horizon.Server(STELLAR_CONFIG.horizonURL);
 
