@@ -1,29 +1,40 @@
-# Wallet-to-Email Relationship Limitations
+# Wallet-to-Email Mapping – Technical Documentation
 
-## Current Status
+## Overview
 
-In the current implementation, the mapping between a user's wallet and their email address is managed **off-chain** using centralized backend infrastructure, specifically a PostgreSQL database. This mapping is required for user authentication and communication, and is handled exclusively by the server.
+In the current implementation of TreeByte, the mapping between wallet and email is handled **off-chain**, fully managed through backend services and stored in a **Supabase (PostgreSQL)** database.
 
-This setup is functional for the MVP and provides a fast and simple integration path.
+This document explains:
+- How wallets are linked to emails.
+- The available wallet creation modes.
+- The risks of centralization and privacy.
+- The purpose of this mapping within recovery flows.
 
-## Limitations
+---
 
-### Centralization Risk
+## Identity Mapping Flow
 
-All identity resolution (wallet ↔ email) depends on centralized systems. If the database is compromised, this could lead to:
+### 1. 📩 Email-Based Wallet Registration
 
-- Identity impersonation (malicious reassignment of wallets or emails).
-- Unauthorized access to user data.
-- Loss of trust in the system's security model.
+When a user creates a wallet, their email is required:
 
-### Privacy Risk
+- If a **publicKey** is provided:
+  - It is treated as an external wallet (e.g., from Freighter).
+  - The wallet is saved with `auth_method: "freighter"`.
+  - No secret is stored.
 
-Since email addresses and wallet addresses are stored together in a centralized backend, user identity metadata could be:
+- If a **passphrase** is provided:
+  - An invisible wallet is generated.
+  - The `secretKey` is encrypted using the passphrase.
+  - The encrypted secret and publicKey are stored.
+  - `auth_method: "invisible"`.
 
-- Leaked in the event of a breach.
-- Correlated without user consent.
-- Misused if access control fails.
+This mapping is stored in the `users` table:
 
-## Notes for Future Work
-
-This document is intended to highlight the **current limitations**. Future iterations should consider decentralized or trust-minimized approaches for identity resolution.
+```sql
+users (
+  email TEXT PRIMARY KEY,
+  public_key TEXT,
+  secret_key_enc TEXT,
+  auth_method TEXT
+)
