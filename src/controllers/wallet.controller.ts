@@ -45,7 +45,7 @@ export const createWallet = async (
           email,
           public_key: publicKey,
           secret_key_enc: null,
-          auth_method: 'freighter',
+          auth_method: 'external',
         },
       ]);
 
