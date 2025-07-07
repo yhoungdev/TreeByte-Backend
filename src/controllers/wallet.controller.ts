@@ -116,3 +116,20 @@ export const sendEncryptedKeyHandler = async (req: express.Request, res: express
     return res.status(400).json({ error: error.message });
   }
 };
+
+export const recoverWalletHandler = async (req: express.Request, res: express.Response) => {
+  try {
+    const { email, passphrase } = req.body;
+
+    if (!email || !passphrase) {
+      return res.status(400).json({ error: 'Email and passphrase are required' });
+    }
+
+    const publicKey = await recoveryService.recoverWallet(email, passphrase);
+
+    return res.status(200).json({ publicKey });
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+

@@ -34,7 +34,7 @@ npm install
 3. Create a `.env` file:
 
 ```
-PORT=3000
+PORT=4000
 ```
 
 4. Run in development mode:
