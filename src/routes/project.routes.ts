@@ -3,6 +3,6 @@ import { registerProject } from '@/controllers/project.controller';
 
 const router = Router();
 
-router.post('/', registerProject);
+router.post('/register', registerProject);
 
 export default router;
