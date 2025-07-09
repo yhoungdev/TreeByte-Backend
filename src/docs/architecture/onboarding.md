@@ -1,12 +1,13 @@
+
 ---
 
 # 📘 `onboarding-flow.md`
 
 ## 🧭 Overview
 
-El flujo de onboarding en el backend de TreeByte permite registrar usuarios con métodos de autenticación flexibles (OAuth, email), asociarlos con wallets Stellar (externas o invisibles), y manejar claves secretas de forma segura mediante cifrado y recuperación vía correo electrónico.
+The backend onboarding flow for TreeByte enables user registration with flexible authentication methods (OAuth, email), wallet creation via Stellar (external or invisible), and secure secret key handling through encryption and email-based recovery.
 
-Este sistema está diseñado off-chain por simplicidad, pero con la posibilidad de evolucionar hacia soluciones más descentralizadas como Soroban identity contracts o DIDs.
+The architecture is intentionally off-chain for simplicity and user experience but designed to evolve toward decentralized identity standards (e.g., Soroban identity contracts, DIDs).
 
 ---
 
@@ -16,9 +17,9 @@ Este sistema está diseñado off-chain por simplicidad, pero con la posibilidad 
 
 **Endpoint:** `POST /register`
 
-* Recibe `email` y `authMethod` (`email` o `google`).
-* Genera un par de claves Stellar con `generateKeypair`.
-* Retorna: `publicKey`, email y método.
+* Accepts `email` and `authMethod` (`email` or `google`).
+* Generates a Stellar keypair via `generateKeypair`.
+* Returns the `publicKey`, email, and auth method.
 
 ---
 
@@ -26,12 +27,12 @@ Este sistema está diseñado off-chain por simplicidad, pero con la posibilidad 
 
 **Endpoint:** `POST /wallet/create`
 
-* Si el usuario envía `publicKey`, se registra como **wallet externa**.
-* Si no, se genera una **wallet invisible**:
+* If `publicKey` is provided, an **external wallet** is registered.
+* If not, an **invisible wallet** is generated:
 
-  * Requiere `passphrase` (mín. 8 caracteres).
-  * Se cifra `secretKey` con AES-256-CBC.
-  * Se almacena en Supabase: `secret_key_enc`.
+  * Requires a `passphrase` (minimum 8 characters).
+  * The `secretKey` is encrypted using AES-256-CBC.
+  * Stored in Supabase under `secret_key_enc`.
 
 ---
 
@@ -39,9 +40,9 @@ Este sistema está diseñado off-chain por simplicidad, pero con la posibilidad 
 
 **Endpoints:**
 
-* `POST /wallet/recovery/export` → exporta la clave en base64.
-* `POST /wallet/recovery/send` → la envía por correo.
-* `POST /wallet/recovery/recover` → valida passphrase, descifra y retorna `publicKey`.
+* `POST /wallet/recovery/export` → Exports the encrypted key (base64).
+* `POST /wallet/recovery/send` → Sends it via email as `.txt` attachment.
+* `POST /wallet/recovery/recover` → Decrypts using passphrase and returns `publicKey`.
 
 ---
 
@@ -49,67 +50,66 @@ Este sistema está diseñado off-chain por simplicidad, pero con la posibilidad 
 
 **Endpoint:** `POST /transactions`
 
-* Recibe `publicKey`.
-* Retorna últimas 10 transacciones desde Horizon (Stellar SDK).
+* Accepts a `publicKey`.
+* Returns the 10 most recent transactions using the Stellar Horizon API.
 
 ---
 
 ## 🧰 Technologies Used
 
-| Componente        | Tecnología/Librería             |
-| ----------------- | ------------------------------- |
-| Framework backend | `Express.js`                    |
-| Base de datos     | `Supabase` (PostgreSQL + API)   |
-| Blockchain        | `@stellar/stellar-sdk`          |
-| Encriptación      | `crypto (AES-256-CBC)`          |
-| Email             | `nodemailer`                    |
-| Logger            | `winston`                       |
-| Dotenv            | `.env` para claves sensibles    |
-| Alias imports     | `@/` para estructura mantenible |
+| Component              | Technology / Library                   |
+| ---------------------- | -------------------------------------- |
+| Backend Framework      | `Express.js`                           |
+| Database               | `Supabase` (PostgreSQL + REST API)     |
+| Blockchain Integration | `@stellar/stellar-sdk`                 |
+| Encryption             | `crypto` module with AES-256-CBC       |
+| Email Service          | `nodemailer`                           |
+| Logging                | `winston`                              |
+| Environment Variables  | `.env` and `dotenv`                    |
+| Import Structure       | `@/` alias paths (no relative imports) |
 
 ---
 
 ## 🔐 Security Measures
 
-| Área                    | Medida aplicada                                                              |
-| ----------------------- | ---------------------------------------------------------------------------- |
-| Cifrado de `secretKey`  | AES-256-CBC (`crypto.createCipheriv` con `sha256(passphrase)` como clave)    |
-| Recuperación segura     | Email con `.txt` adjunto cifrado + advertencias en el cuerpo del mensaje     |
-| Validaciones input      | Regex para `publicKey`, tamaño mínimo en `passphrase`, checks de duplicación |
-| Separación de claves    | `publicKey` almacenado en texto plano, `secretKey` cifrado                   |
-| Protección de endpoints | Respuestas específicas por error y uso de status HTTP correctos              |
+| Area                  | Implementation Details                                                                |
+| --------------------- | ------------------------------------------------------------------------------------- |
+| Secret key encryption | AES-256-CBC using `crypto.createCipheriv` and SHA-256 hashed passphrase as the key    |
+| Key recovery          | Optional email backup with attached `.txt` and security notice in HTML email body     |
+| Input validation      | Regex for Stellar public key, passphrase length checks, duplicate account checks      |
+| Key separation        | `publicKey` stored as plaintext; `secretKey` encrypted and stored as `secret_key_enc` |
+| Endpoint protection   | HTTP status codes, error logging, and explicit error messages                         |
 
 ---
 
 ## ⚖️ Off-chain Design Decisions
 
-* **Asociación Wallet ↔ Email:** se hace off-chain por simplicidad UX y rapidez de implementación.
-* **Cifrado local de claves:** permite recuperación sin contratos Soroban ni necesidad de firma on-chain.
-* **Autenticación híbrida:** se acepta login por email, Google u otros en el frontend.
+* **Wallet ↔ Email Binding:** Handled off-chain for simplicity and minimal UX friction.
+* **Key encryption and recovery:** Keeps secret keys encrypted locally and recoverable without blockchain transactions.
+* **Hybrid authentication:** Users can register with email or social logins, optionally attach their own wallet.
 
 ---
 
-## 🔮 Suggestions for Future Improvements
+## 🔮 Future Improvements
 
-| Propuesta                       | Descripción                                                                                  |
-| ------------------------------- | -------------------------------------------------------------------------------------------- |
-| 🧾 Soroban Identity Contract    | Un contrato Soroban que permita asociar identidades públicas con wallets                     |
-| 🪪 DID & Verifiable Credentials | Uso de [DIDs](https://w3c.github.io/did-core/) e [VCs](https://www.w3.org/TR/vc-data-model/) |
-| 🔗 IPFS para backups            | Guardar claves cifradas o metadata firmada en IPFS                                           |
-| ✅ Session signatures            | Firmar los requests con la clave privada del usuario (login sin servidor)                    |
-
----
-
-## 📁 Folder & Code Structure
-
-* Usa **`kebab-case`** para nombres de archivos y carpetas (`wallet-service.ts`, `recovery.service.ts`).
-* No se permiten imports relativos como `../../utils` → se usan alias `@/utils/logger`.
-* Estructura separada por responsabilidad:
-
-  * `controllers/` → entrada desde Express.
-  * `services/` → lógica de negocio (recovery, Stellar).
-  * `lib/` → utilidades como Stellar Server o encryption.
-  * `config/` → configuración de red Stellar.
+| Feature Proposal               | Description                                                                                                    |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| 🧾 Soroban Identity Contracts  | Bind Stellar identity to smart contracts for on-chain account representation                                   |
+| 🪪 Decentralized IDs (DIDs)    | Use [DIDs](https://w3c.github.io/did-core/) and [Verifiable Credentials](https://www.w3.org/TR/vc-data-model/) |
+| 🔗 IPFS Backup Storage         | Host encrypted key backups as verifiable blobs on IPFS                                                         |
+| ✅ Session-based Wallet Signing | Use wallet signatures instead of server-based auth/session tokens                                              |
 
 ---
 
+## 📁 Code Structure Guidelines
+
+* Use **`kebab-case`** for all file and folder names (`wallet-service.ts`, `recovery.service.ts`).
+* Avoid relative imports like `../../utils` – use alias paths like `@/utils/logger`.
+* Split code by concern:
+
+  * `controllers/` → Express route handlers
+  * `services/` → Business logic (wallet, recovery, Stellar ops)
+  * `lib/` → Helpers like Stellar server instance, encryption
+  * `config/` → Network config and environment setup
+
+---
