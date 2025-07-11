@@ -1,40 +1,60 @@
-use soroban_sdk::{contract, contractimpl, Env, Address};
+use soroban_sdk::{contract, contractimpl, Env, Address, String};
 use crate::{storage, events, types::DataKey};
 
-#[contract] // Genera el client automáticamente
+#[contract]
 pub struct FixedToken;
 
 #[contractimpl]
 impl FixedToken {
-    pub fn init(env: Env, initial_supply: i128) {
+    /// Initializes the contract with fixed supply, project name, id, and issuer
+    pub fn init(env: Env, initial_supply: u64, project_name: String, project_id: String, issuer: Address) {
         // Prevent multiple initializations
         if env.storage().instance().has(&DataKey::RemainingSupply) {
             panic!("The contract has already been initialized");
         }
-        // Set the fixed total supply
+        // Store initial supply and project metadata
         env.storage().instance().set(&DataKey::RemainingSupply, &initial_supply);
+        env.storage().instance().set(&DataKey::ProjectName, &project_name);
+        env.storage().instance().set(&DataKey::ProjectId, &project_id);
+        env.storage().instance().set(&DataKey::IssuerAddress, &issuer);
     }
 
-    pub fn buy_tokens(env: Env, buyer: Address, amount: i128) {
-        buyer.require_auth(); // Require buyer signature
+    /// Allows a buyer to purchase tokens if enough remain
+    pub fn buy_tokens(env: Env, buyer: Address, amount: u64) {
+        buyer.require_auth(); // Requires buyer signature
 
-        if amount <= 0 {
-            panic!("The purchase amount must be positive");
+        if amount == 0 {
+            panic!("Purchase amount must be positive");
         }
 
-        // Reduce remaining supply
+        // Deduct from remaining supply and credit to buyer balance
         storage::spend_remaining(&env, amount);
-        // Add to buyer balance
         storage::add_balance(&env, &buyer, amount);
-        // Emit event
         events::buy_event(&env, &buyer, amount);
     }
 
-    pub fn get_remaining_supply(env: Env) -> i128 {
+    /// Returns remaining supply
+    pub fn get_remaining_supply(env: Env) -> u64 {
         storage::read_remaining_supply(&env)
     }
 
-    pub fn balance(env: Env, addr: Address) -> i128 {
+    /// Returns the balance of a specific address
+    pub fn balance(env: Env, addr: Address) -> u64 {
         storage::read_balance(&env, &addr)
+    }
+
+    /// Returns the project name
+    pub fn project_name(env: Env) -> String {
+        storage::read_project_name(&env)
+    }
+
+    /// Returns the project id
+    pub fn project_id(env: Env) -> String {
+        storage::read_project_id(&env)
+    }
+
+    /// Returns the issuer address
+    pub fn issuer_address(env: Env) -> Address {
+        storage::read_issuer_address(&env)
     }
 }
