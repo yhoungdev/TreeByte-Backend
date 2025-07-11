@@ -1,49 +1,105 @@
-#![cfg(test)]
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::soulbound_token_contract::{SoulboundToken, SoulboundTokenClient};
+    use soroban_sdk::{
+        Address, Env, symbol_short,
+        testutils::{Address as _, Ledger},
+    };
 
-use soroban_sdk::{
-    testutils::Address as _,
-    symbol_short, Address, Env,
-};
-use soroban_sdk::testutils::Ledger;
-use crate::soulbound_token_contract::{SoulboundToken, SoulboundTokenClient, TokenMetadata};
+    fn setup_contract(env: &Env) -> (SoulboundTokenClient, Address, Address) {
+        let contract_id = env.register_contract(None, SoulboundToken);
+        let client = SoulboundTokenClient::new(env, &contract_id);
+
+        let issuer = Address::generate(env);
+        let user = Address::generate(env);
+
+        env.mock_all_auths();
+
+        client.init(&issuer);
+
+        (client, issuer, user)
+    }
+
+    #[test]
+    fn test_mint_and_get_token() {
+        let env = Env::default();
+        env.ledger().with_mut(|l| l.timestamp = 123456789);
+
+        let (client, issuer, user) = setup_contract(&env);
+        let token_id = client.mint(&issuer, &user, &symbol_short!("tree"), &10u64);
+
+        let token = client.get_token(&token_id);
+        assert_eq!(token.owner, user);
+        assert_eq!(token.project_id, symbol_short!("tree"));
+        assert_eq!(token.trees_count, 10);
+        assert_eq!(token.timestamp, 123456789);
+    }
+
+    #[test]
+    #[should_panic(expected = "unauthorized")]
+    fn test_mint_unauthorized() {
+        let env = Env::default();
+        let (client, _issuer, user) = setup_contract(&env);
+
+        let attacker = Address::generate(&env);
+        client.mint(&attacker, &user, &symbol_short!("tree"), &10u64);
+    }
+
+    #[test]
+    fn test_get_tokens_by_owner_empty() {
+        let env = Env::default();
+        let (client, _issuer, user) = setup_contract(&env);
 
 
-fn setup_contract(env: &Env) -> (SoulboundTokenClient, Address, Address) {
-    // Register the contract implementation in memory
-    let contract_id = env.register_contract(None, SoulboundToken);
-    let client = SoulboundTokenClient::new(env, &contract_id);
+        let tokens = client.get_tokens_by_owner(&user);
 
-    // Generate issuer and user
-    let issuer = Address::generate(env);
-    let user = Address::generate(env);
+        assert_eq!(tokens.len(), 0);
+    }
 
-    // Mock auths so all require_auth passes
-    env.mock_all_auths();
+    #[test]
+    #[should_panic(expected = "token not found")]
+    fn test_get_nonexistent_token_should_panic() {
+        let env = Env::default();
+        let (client, _issuer, _user) = setup_contract(&env);
 
-    // Initialize the contract
-    client.init(&issuer);
 
-    (client, issuer, user)
-}
+        client.get_token(&0); 
+    }
 
-#[test]
-fn test_mint_and_get_token() {
-    let env = Env::default();
+    #[test]
+    fn test_mint_multiple_users() {
+        let env = Env::default();
+        let (client, issuer, user1) = setup_contract(&env);
+        let user2 = Address::generate(&env);
 
-    // Set a fixed timestamp
-    env.ledger().with_mut(|ledger| {
-        ledger.timestamp = 123456789;
-    });
+        client.mint(&issuer, &user1, &symbol_short!("a"), &1u64); // token 0
+        client.mint(&issuer, &user2, &symbol_short!("b"), &2u64); // token 1
 
-    let (client, issuer, user) = setup_contract(&env);
+        let token0 = client.get_token(&0);
+        let token1 = client.get_token(&1);
 
-    // Call mint
-    client.mint(&issuer, &user, &symbol_short!("tree"), &10u64);
+        assert_eq!(token0.owner, user1);
+        assert_eq!(token1.owner, user2);
 
-    // Get and validate the token
-    let token = client.get_token(&0);
-    assert_eq!(token.owner, user);
-    assert_eq!(token.project_id, symbol_short!("tree"));
-    assert_eq!(token.trees_count, 10);
-    assert_eq!(token.timestamp, 123456789);
+        let user1_tokens = client.get_tokens_by_owner(&user1);
+        let user2_tokens = client.get_tokens_by_owner(&user2);
+
+        assert_eq!(user1_tokens.len(), 1);
+        assert_eq!(user1_tokens.get(0), Some(0));
+        assert_eq!(user2_tokens.len(), 1);
+        assert_eq!(user2_tokens.get(0), Some(1));
+    }
+
+    #[test]
+    fn test_token_id_incrementing() {
+        let env = Env::default();
+        let (client, issuer, user) = setup_contract(&env);
+
+        let id1 = client.mint(&issuer, &user, &symbol_short!("one"), &1u64);
+        let id2 = client.mint(&issuer, &user, &symbol_short!("two"), &2u64);
+
+        assert_eq!(id1, 0);
+        assert_eq!(id2, 1);
+    }
 }
