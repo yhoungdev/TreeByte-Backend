@@ -1,6 +1,6 @@
 {
   "generators": {
-    "address": 2,
+    "address": 3,
     "nonce": 0
   },
   "auth": [
@@ -45,15 +45,48 @@
                         "key": {
                           "vec": [
                             {
+                              "symbol": "IssuerAddress"
+                            }
+                          ]
+                        },
+                        "val": {
+                          "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
+                        }
+                      },
+                      {
+                        "key": {
+                          "vec": [
+                            {
+                              "symbol": "ProjectId"
+                            }
+                          ]
+                        },
+                        "val": {
+                          "string": "BV-001"
+                        }
+                      },
+                      {
+                        "key": {
+                          "vec": [
+                            {
+                              "symbol": "ProjectName"
+                            }
+                          ]
+                        },
+                        "val": {
+                          "string": "Bosque Verde"
+                        }
+                      },
+                      {
+                        "key": {
+                          "vec": [
+                            {
                               "symbol": "RemainingSupply"
                             }
                           ]
                         },
                         "val": {
-                          "i128": {
-                            "hi": 0,
-                            "lo": 1000
-                          }
+                          "u64": 1000
                         }
                       }
                     ]
