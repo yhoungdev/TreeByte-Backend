@@ -1,6 +1,5 @@
 extern crate alloc;
 
-use alloc::format;
 use soroban_sdk::*;
 
 #[derive(Clone, Debug)]
@@ -11,7 +10,7 @@ pub struct TokenMetadata {
     pub trees_count: u64,
     pub timestamp: u64,
 }
-use soroban_sdk::{IntoVal, Val};
+
 #[contract]
 pub struct SoulboundToken;
 
