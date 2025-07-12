@@ -60,3 +60,35 @@
 
 ---
 
+### 🧪 Trustline Validation + Wallet Generation Test
+
+📍 **Path:** `src/test/stellar/test-trustline.ts`
+💻 **Command:** `npm run test:trustline`
+🛠️ **Purpose:**
+Simulates a full flow where a new Stellar testnet wallet is generated and funded. Then, the script checks whether the wallet has a trustline established for a specific asset (e.g. USDC). The secret key is encrypted using a given passphrase for secure storage or transport.
+
+✅ **Expected result:**
+Displays the wallet's public key, encrypted secret key, confirms successful funding via Friendbot, and shows whether the trustline exists.
+
+❌ **Failure case:**
+
+* Friendbot funding fails (network or address format error).
+* Horizon responds with account not found.
+* Trustline check fails due to network misconfiguration or missing asset issuer.
+
+📎 **Notes:**
+
+* The testnet wallet is ephemeral and unique per run.
+* The trustline is not created automatically — the test only checks its presence.
+* Uses `@stellar/stellar-sdk`, `axios`, and an internal `encrypt(secret, passphrase)` utility.
+* Asset issuer and code are hardcoded but can be parameterized later.
+
+📦 **Script added in package.json:**
+
+```json
+"test:trustline": "ts-node -r tsconfig-paths/register src/test/stellar/test-trustline.ts"
+```
+
+---
+
+
