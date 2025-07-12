@@ -1,30 +1,20 @@
 import { Request, Response } from "express";
-import db from "@/lib/db/db";
+import { registerProjectService } from "@/services/project.service";
 
-interface projectDTO {
-  name: string;
-  description: string;
-  location: string;
-  photo_url: string;
-  impact: string;
-  asset_code: string;
-  supply: number;
-}
-
-export const registerProject = async (
+export const registerProjectController = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const body: projectDTO = req.body;
-  const { error: insertError } = await db.from("projects").insert([body]);
+  try {
+    const project = req.body;
+    const savedProject = await registerProjectService(project); 
 
-  if (insertError) {
-    console.error(insertError);
-    res.status(500).json({ error: "Error inserting external wallet" });
-    return;
+    res.status(201).json({
+      message: "Project registered successfully",
+      data: savedProject,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error registering project" });
   }
-  res.status(201).json({
-    message: "Project registered successfully",
-    body,
-  });
 };
