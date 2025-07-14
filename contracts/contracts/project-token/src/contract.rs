@@ -7,7 +7,7 @@ pub struct FixedToken;
 #[contractimpl]
 impl FixedToken {
     /// Initializes the contract with fixed supply, project name, id, and issuer
-    pub fn init(env: Env, initial_supply: u64, project_name: String, project_id: String, issuer: Address) {
+    pub fn init(env: Env, initial_supply: u64, project_name: String, project_id: String, ipfs_hash: String, issuer: Address) {
         // Prevent multiple initializations
         if env.storage().instance().has(&DataKey::RemainingSupply) {
             panic!("The contract has already been initialized");
@@ -16,6 +16,7 @@ impl FixedToken {
         env.storage().instance().set(&DataKey::RemainingSupply, &initial_supply);
         env.storage().instance().set(&DataKey::ProjectName, &project_name);
         env.storage().instance().set(&DataKey::ProjectId, &project_id);
+        env.storage().instance().set(&DataKey::IpfsHash, &ipfs_hash);
         env.storage().instance().set(&DataKey::IssuerAddress, &issuer);
     }
 
@@ -51,6 +52,11 @@ impl FixedToken {
     /// Returns the project id
     pub fn project_id(env: Env) -> String {
         storage::read_project_id(&env)
+    }
+
+    /// Returns the stored IPFS hash
+    pub fn ipfs_hash(env: Env) -> String {
+        storage::read_ipfs_hash(&env)
     }
 
     /// Returns the issuer address
