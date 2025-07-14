@@ -48,6 +48,11 @@ pub fn read_project_id(env: &Env) -> String {
     env.storage().instance().get(&DataKey::ProjectId).unwrap_or(String::from_str(env, ""))
 }
 
+/// Reads the stored IPFS hash
+pub fn read_ipfs_hash(env: &Env) -> String {
+    env.storage().instance().get(&DataKey::IpfsHash).unwrap_or(String::from_str(env, ""))
+}
+
 /// Reads the stored issuer address
 pub fn read_issuer_address(env: &Env) -> Address {
     env.storage().instance().get(&DataKey::IssuerAddress).unwrap()
