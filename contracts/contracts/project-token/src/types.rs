@@ -8,4 +8,5 @@ pub enum DataKey {
     ProjectName,            // Project name (string)
     ProjectId,              // Project ID (string, can adapt to u64 if needed)
     IssuerAddress,          // Project issuer's address
+    IpfsHash,               // Stores the IPFS hash associated with the project or token metadata
 }
