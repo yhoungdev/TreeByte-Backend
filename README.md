@@ -23,66 +23,86 @@ git clone https://github.com/Tree-Byte-org/TreeByte-Backend.git
 cd TreeByte-Backend
 ```
 
-2. Install dependencies:
+## 🔐 Environment Setup
+
+1. Duplicate the `.env.example` file and rename it to `.env`
+2. Add your Supabase credentials:
+
+```env
+# ================================
+# SERVER CONFIGURATION
+# ================================
+PORT=4000
+
+# ================================
+# SUPABASE CONFIGURATION
+# ================================
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+# ================================
+# EMAIL CONFIGURATION
+# ================================
+MAIL_USER=your_email@gmail.com
+MAIL_PASS=your_email_password_or_app_password
+
+# ================================
+# PINATA (IPFS)
+# ================================
+PINATA_API_KEY=pinata_api_key
+PINATA_SECRET_API_KEY=pinata_secret_api_key
+PINATA_JWT=pinata_jwt
+```
+
+> You can find these keys in your Supabase [dashboard](https://supabase.com/dashboard), under **Project Settings → API**.
+
+---
+
+## 🧪 Database Setup with Supabase
+
+### 1. Create a Supabase Project
+
+* Go to [https://supabase.com](https://supabase.com)
+* Create a new project
+* Save the project ref and password
+
+### 2. Link Your Supabase Project
+
+```bash
+npx supabase login
+npx supabase link --project-ref YOUR_PROJECT_REF
+```
+
+You’ll be asked to enter your database password.
+
+---
+
+### 3. Apply Migrations
+
+Once linked, push your SQL migrations:
+
+```bash
+npx supabase db push
+```
+
+This will create all tables defined in `supabase/migrations/` in your Supabase project.
+
+---
+
+## 🚀 Run the Backend
+
+### Development Mode
 
 ```bash
 npm install
-```
-
-3. Create a .env file:
-
-```env
-PORT=4000
-SUPABASE_URL=your-project-url
-SUPABASE_ANON_KEY=your-anon-key
-
-MAIL_USER=your_email@gmail.com
-MAIL_PASS=your_email_password_or_app_password
-```
-
-4. Apply the database schema automatically:
-
-After adding your Supabase URL and Anon Key, run:
-
-```bash
-npx supabase db push
-```
-
-✅ This command will create all tables and extensions in your own Supabase project without needing to upload anything manually.
-
-5. Run in development mode:
-
-```bash
 npm run dev
 ```
 
-6. Or build and run in production:
+### Production Mode
 
 ```bash
-npm run build
-npm start
+npm run start
 ```
-
----
-
-🧭 What does this backend handle?
-
-* API endpoints for tree data and purchase flow
-* Dynamic wallet management for both Freighter users and invisible accounts
-* NFT metadata generation (ready for IPFS)
-* Secure environment handling and modular service architecture
-
----
-
-⚠️ Note for contributors
-
-If new tables are added in future updates, just pull the latest changes and run:
-
-```bash
-npx supabase db push
-```
-
-again to apply all database updates to your own Supabase project.
 
 ---
 
