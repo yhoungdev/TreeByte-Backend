@@ -16,7 +16,7 @@ This is the backend for **TreeByte**, a platform that transforms your digital fo
 
 📦 How to clone and run locally
 
-1. Clone the repository:
+Clone the repository:
 
 ```bash
 git clone https://github.com/Tree-Byte-org/TreeByte-Backend.git
