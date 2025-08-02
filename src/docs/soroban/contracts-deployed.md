@@ -1,23 +1,19 @@
 **Project Token**
 
-josue1908@Josue:/mnt/c/Tree Byte/TreeByte-Backend/contracts$ stellar contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/project_token.wasm \
-  --source alice \
-  --network testnet \
-  --alias project_token
-ℹ️ Skipping install because wasm already installed
-ℹ️ Using wasm hash 26b3b7e9cf24fdb9fa97469aad4bee30ab3033f403bdc25b1fce57f96b5d5a9e
-ℹ️ Simulating deploy transaction…
-ℹ️ Transaction hash is 203299e25ed948e4279cc8ed485452076e25ed64ea0001b56dfc411c1400cbb3
-🔗 https://stellar.expert/explorer/testnet/tx/203299e25ed948e4279cc8ed485452076e25ed64ea0001b56dfc411c1400cbb3
-ℹ️ Signing transaction: 203299e25ed948e4279cc8ed485452076e25ed64ea0001b56dfc411c1400cbb3
-🌎 Submitting deploy transaction…
-🔗 https://stellar.expert/explorer/testnet/contract/CACFLZN5UBPWC4N5ERBIIPSTFVCAURHRRIU5MKR3V2VP5KJ2ATX4MFA4
-✅ Deployed!
-⚠️ Overwriting existing contract id: CDS3DAQXFWQEPPCSIARMINS2K5EWVT7UBIFRPVN5CNXWH3NSDWVHHAX3
-CACFLZN5UBPWC4N5ERBIIPSTFVCAURHRRIU5MKR3V2VP5KJ2ATX4MFA4
-josue1908@Josue:/mnt/c/Tree Byte/TreeByte-Backend/contracts$ 
+`stellar contract deploy --wasm target/wasm32v1-none/release/project_token.wasm --source-account alice --network testnet -- --initial_supply 1000 --project_name "Bosque Verde" --project_id "BV-001" --ipfs_hash "ipfs://bosque-verde-001" --issuer GADGVW7RXKGSXKWRQF2T6VFTQ4K2S2JOYUSZ7V2KVZ6RGLK32GRZXLRA`
 
+ℹ️  Simulating install transaction…
+ℹ️  Signing transaction: f1202ad5b2ffba7fd7f11918e770c848040f79b91190f14431ad5ef994c44a78
+🌎 Submitting install transaction…
+ℹ️  Using wasm hash 7ca2af256b5fcbdbc16a9af229b43e58d7631e13f198de31a7a0240d70aa2239
+ℹ️  Simulating deploy transaction…
+ℹ️  Transaction hash is 0672c9c404ba9dc89585c0e7643e09a1f79026a93417bd2c70aa178bebb5255f
+🔗 https://stellar.expert/explorer/testnet/tx/0672c9c404ba9dc89585c0e7643e09a1f79026a93417bd2c70aa178bebb5255f
+ℹ️  Signing transaction: 0672c9c404ba9dc89585c0e7643e09a1f79026a93417bd2c70aa178bebb5255f
+🌎 Submitting deploy transaction…
+🔗 https://stellar.expert/explorer/testnet/contract/CANSAO7W4JWZE445NXVN34IXMIZ2KZI6YM4HHEE3AZ7U737MC3ZOE67H
+✅ Deployed!
+CANSAO7W4JWZE445NXVN34IXMIZ2KZI6YM4HHEE3AZ7U737MC3ZOE67H
 
 **Soulbound Token**
 
