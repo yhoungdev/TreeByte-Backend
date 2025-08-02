@@ -1,6 +1,5 @@
-extern crate alloc;
+use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, Env, Symbol, Vec, Address};
 
-use soroban_sdk::*;
 
 #[derive(Clone, Debug)]
 #[contracttype]
