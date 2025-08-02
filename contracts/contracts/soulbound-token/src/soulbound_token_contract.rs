@@ -1,6 +1,5 @@
 use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, Env, Symbol, Vec, Address};
 
-
 #[derive(Clone, Debug)]
 #[contracttype]
 pub struct TokenMetadata {
