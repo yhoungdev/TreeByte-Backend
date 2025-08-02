@@ -1,6 +1,5 @@
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::soulbound_token_contract::{SoulboundToken, SoulboundTokenClient};
     use soroban_sdk::{
         Address, Env, symbol_short,
@@ -8,7 +7,7 @@ mod tests {
     };
 
     fn setup_contract(env: &Env) -> (SoulboundTokenClient, Address, Address) {
-        let contract_id = env.register_contract(None, SoulboundToken);
+        let contract_id = env.register(SoulboundToken, ());
         let client = SoulboundTokenClient::new(env, &contract_id);
 
         let issuer = Address::generate(env);

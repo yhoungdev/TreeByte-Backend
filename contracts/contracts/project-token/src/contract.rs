@@ -1,17 +1,11 @@
-use soroban_sdk::{contract, contractimpl, Env, Address, String};
-use crate::{storage, events, types::DataKey};
-
-#[contract]
-pub struct FixedToken;
+use super::{FixedToken, FixedTokenClient};
+use soroban_sdk::{contractimpl, Env, Address, String};
+use crate::{storage, events, types::DataKey, FixedTokenArgs};
 
 #[contractimpl]
 impl FixedToken {
     /// Initializes the contract with fixed supply, project name, id, and issuer
-    pub fn init(env: Env, initial_supply: u64, project_name: String, project_id: String, ipfs_hash: String, issuer: Address) {
-        // Prevent multiple initializations
-        if env.storage().instance().has(&DataKey::RemainingSupply) {
-            panic!("The contract has already been initialized");
-        }
+    pub fn __constructor(env: Env, initial_supply: u64, project_name: String, project_id: String, ipfs_hash: String, issuer: Address) {
         // Store initial supply and project metadata
         env.storage().instance().set(&DataKey::RemainingSupply, &initial_supply);
         env.storage().instance().set(&DataKey::ProjectName, &project_name);
