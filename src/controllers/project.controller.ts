@@ -4,7 +4,7 @@ import {
   getProjectByIdService,
   getAllProjectsService,
   getPaginatedProjectsService,
-} from "@/services/project-service";
+} from "../services/project.service";
 
 export const registerProjectController = async (
   req: Request,
