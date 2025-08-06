@@ -10,11 +10,11 @@ export * from './transaction.service';
 export * from './asset.service';
 export * from './trustline.service';
 
-// Re-export commonly used instances
-export { stellarClientService } from './stellar-client.service';
-export { accountService } from './account.service';
-export { walletService } from './wallet.service';
-export { transactionService } from './transaction.service';
-export { assetService } from './asset.service';
-export { trustlineService } from './trustline.service';
-export { connectionManager } from './connection-manager.service';
+// Create instances only when needed to avoid circular dependencies
+export const stellarClientService = new (require('./stellar-client.service').StellarClientService)();
+export const accountService = new (require('./account.service').AccountService)();
+export const walletService = new (require('./wallet.service').WalletService)();
+export const transactionService = new (require('./transaction.service').TransactionService)();
+export const assetService = new (require('./asset.service').AssetService)();
+export const trustlineService = new (require('./trustline.service').TrustlineService)();
+export const connectionManager = new (require('./connection-manager.service').ConnectionManagerService)();
