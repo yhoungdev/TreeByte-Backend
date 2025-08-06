@@ -1,7 +1,7 @@
 import { Asset, Keypair } from '@stellar/stellar-sdk';
-import { TransactionService, transactionService } from './transaction.service';
-import { AccountService, accountService } from './account.service';
-import { AssetService, assetService } from './asset.service';
+import { TransactionService } from './transaction.service';
+import { AccountService } from './account.service';
+import { AssetService } from './asset.service';
 import { StellarError, StellarErrorHandler } from './error-handler.service';
 
 export interface TrustlineInfo {
@@ -31,10 +31,14 @@ export interface TrustlineStatus {
 
 export class TrustlineService {
   constructor(
-    private transactionService: TransactionService = transactionService,
-    private accountService: AccountService = accountService,
-    private assetService: AssetService = assetService
-  ) {}
+    private transactionService?: TransactionService,
+    private accountService?: AccountService,
+    private assetService?: AssetService
+  ) {
+    this.transactionService = transactionService || new TransactionService();
+    this.accountService = accountService || new AccountService();
+    this.assetService = assetService || new AssetService();
+  }
 
   async createTrustline(params: CreateTrustlineParams) {
     const { sourceKeypair, asset, limit, memo } = params;
@@ -297,4 +301,4 @@ export class TrustlineService {
   }
 }
 
-export const trustlineService = new TrustlineService();
+// Remove default instance export to avoid circular dependencies
