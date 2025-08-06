@@ -1,5 +1,5 @@
-import { Keypair, AccountResponse } from '@stellar/stellar-sdk';
-import { StellarClientService, stellarClientService } from './stellar-client.service';
+import { Keypair } from '@stellar/stellar-sdk';
+import { StellarClientService } from './stellar-client.service';
 import { StellarError, StellarErrorHandler } from './error-handler.service';
 
 export interface AccountBalance {
@@ -27,7 +27,9 @@ export interface AccountInfo {
 }
 
 export class AccountService {
-  constructor(private stellarClient: StellarClientService = stellarClientService) {}
+  constructor(private stellarClient?: StellarClientService) {
+    this.stellarClient = stellarClient || new StellarClientService();
+  }
 
   async createKeypair(): Promise<Keypair> {
     try {
@@ -41,7 +43,7 @@ export class AccountService {
     const keypair = await this.createKeypair();
     
     await StellarErrorHandler.withRetry(async () => {
-      await this.stellarClient.fundAccount(keypair.publicKey());
+      await this.stellarClient!.fundAccount(keypair.publicKey());
     });
 
     return keypair;
@@ -49,12 +51,12 @@ export class AccountService {
 
   async fundAccount(publicKey: string): Promise<void> {
     await StellarErrorHandler.withRetry(async () => {
-      await this.stellarClient.fundAccount(publicKey);
+      await this.stellarClient!.fundAccount(publicKey);
     });
   }
 
-  async getAccount(publicKey: string): Promise<AccountResponse> {
-    return await this.stellarClient.getAccount(publicKey);
+  async getAccount(publicKey: string): Promise<any> {
+    return await this.stellarClient!.getAccount(publicKey);
   }
 
   async getAccountInfo(publicKey: string): Promise<AccountInfo> {
@@ -63,7 +65,7 @@ export class AccountService {
     return {
       id: account.id,
       sequence: account.sequence,
-      balances: account.balances.map(balance => ({
+      balances: account.balances.map((balance: any) => ({
         asset_type: balance.asset_type,
         asset_code: balance.asset_code,
         asset_issuer: balance.asset_issuer,
@@ -95,7 +97,7 @@ export class AccountService {
   }
 
   async accountExists(publicKey: string): Promise<boolean> {
-    return await this.stellarClient.isAccountExists(publicKey);
+    return await this.stellarClient!.isAccountExists(publicKey);
   }
 
   async getSequenceNumber(publicKey: string): Promise<string> {
@@ -137,7 +139,7 @@ export class AccountService {
     }
   }
 
-  async waitForAccount(publicKey: string, maxWaitTime = 30000): Promise<AccountResponse> {
+  async waitForAccount(publicKey: string, maxWaitTime = 30000): Promise<any> {
     const startTime = Date.now();
     const pollInterval = 2000; // 2 seconds
 
@@ -160,4 +162,4 @@ export class AccountService {
   }
 }
 
-export const accountService = new AccountService();
+// Remove default instance export to avoid circular dependencies
