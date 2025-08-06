@@ -1,6 +1,6 @@
 import { Asset, Keypair } from '@stellar/stellar-sdk';
-import { TransactionService, transactionService } from './transaction.service';
-import { AccountService, accountService } from './account.service';
+import { TransactionService } from './transaction.service';
+import { AccountService } from './account.service';
 import { StellarError } from './error-handler.service';
 
 export interface AssetInfo {
@@ -41,9 +41,12 @@ export interface AssetTransferParams {
 
 export class AssetService {
   constructor(
-    private transactionService: TransactionService = transactionService,
-    private accountService: AccountService = accountService
-  ) {}
+    private transactionService?: TransactionService,
+    private accountService?: AccountService
+  ) {
+    this.transactionService = transactionService || new TransactionService();
+    this.accountService = accountService || new AccountService();
+  }
 
   createAsset(code: string, issuer: string): Asset {
     try {
@@ -253,4 +256,4 @@ export class AssetService {
   }
 }
 
-export const assetService = new AssetService();
+// Remove default instance export to avoid circular dependencies
