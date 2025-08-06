@@ -4,11 +4,10 @@ import {
   Keypair, 
   Operation,
   Asset,
-  ServerApi,
-  SubmitTransactionResponse
+  Memo
 } from '@stellar/stellar-sdk';
-import { StellarClientService, stellarClientService } from './stellar-client.service';
-import { AccountService, accountService } from './account.service';
+import { StellarClientService } from './stellar-client.service';
+import { AccountService } from './account.service';
 import { StellarError, StellarErrorHandler } from './error-handler.service';
 
 export interface PaymentOperation {
@@ -29,7 +28,7 @@ export interface TransactionOptions {
 export interface TransactionResult {
   hash: string;
   status: 'success' | 'failed';
-  response: SubmitTransactionResponse;
+  response: any;
 }
 
 export interface TransactionHistory {
@@ -57,24 +56,27 @@ export interface PaymentRecord {
 
 export class TransactionService {
   constructor(
-    private stellarClient: StellarClientService = stellarClientService,
-    private accountService: AccountService = accountService
-  ) {}
+    private stellarClient?: StellarClientService,
+    private accountService?: AccountService
+  ) {
+    this.stellarClient = stellarClient || new StellarClientService();
+    this.accountService = accountService || new AccountService();
+  }
 
   async createTransactionBuilder(sourcePublicKey: string, options?: TransactionOptions): Promise<TransactionBuilder> {
-    const account = await this.accountService.getAccount(sourcePublicKey);
-    const baseFee = await this.stellarClient.fetchBaseFee();
+    const account = await this.accountService!.getAccount(sourcePublicKey);
+    const baseFee = await this.stellarClient!.fetchBaseFee();
     
     const fee = options?.fee || String(baseFee);
     
     const builder = new TransactionBuilder(account, {
       fee,
-      networkPassphrase: this.stellarClient.getNetworkPassphrase(),
+      networkPassphrase: this.stellarClient!.getNetworkPassphrase(),
       timebounds: options?.timeBounds,
     });
 
     if (options?.memo) {
-      builder.addMemo(Operation.createTextMemo(options.memo));
+      builder.addMemo(Memo.text(options.memo));
     }
 
     return builder;
@@ -98,7 +100,7 @@ export class TransactionService {
       transaction.sign(sourceKeypair);
 
       const response = await StellarErrorHandler.withRetry(async () => {
-        return await this.stellarClient.submitTransaction(transaction);
+        return await this.stellarClient!.submitTransaction(transaction);
       });
 
       return {
@@ -150,7 +152,7 @@ export class TransactionService {
       transaction.sign(sourceKeypair);
 
       const response = await StellarErrorHandler.withRetry(async () => {
-        return await this.stellarClient.submitTransaction(transaction);
+        return await this.stellarClient!.submitTransaction(transaction);
       });
 
       return {
@@ -177,9 +179,9 @@ export class TransactionService {
   }
 
   async getTransactionHistory(publicKey: string, limit = 10): Promise<TransactionHistory[]> {
-    const response = await this.stellarClient.getTransactions(publicKey, limit);
+    const response = await this.stellarClient!.getTransactions(publicKey, limit);
     
-    return response.records.map(record => ({
+    return response.records.map((record: any) => ({
       id: record.id,
       hash: record.hash,
       created_at: record.created_at,
@@ -192,9 +194,9 @@ export class TransactionService {
   }
 
   async getPaymentHistory(publicKey: string, limit = 10): Promise<PaymentRecord[]> {
-    const response = await this.stellarClient.getPayments(publicKey, limit);
+    const response = await this.stellarClient!.getPayments(publicKey, limit);
     
-    return response.records.map(record => ({
+    return response.records.map((record: any) => ({
       id: record.id,
       transaction_hash: record.transaction_hash,
       created_at: record.created_at,
@@ -207,15 +209,15 @@ export class TransactionService {
     }));
   }
 
-  async getTransaction(hash: string): Promise<ServerApi.TransactionRecord> {
+  async getTransaction(hash: string): Promise<any> {
     try {
-      return await this.stellarClient.getServer().transactions().transaction(hash).call();
+      return await this.stellarClient!.getServer().transactions().transaction(hash).call();
     } catch (error) {
       throw new StellarError('Failed to fetch transaction', error as Error, { hash });
     }
   }
 
-  async waitForTransaction(hash: string, timeout = 30000): Promise<ServerApi.TransactionRecord> {
+  async waitForTransaction(hash: string, timeout = 30000): Promise<any> {
     const startTime = Date.now();
     const pollInterval = 2000; // 2 seconds
 
@@ -241,7 +243,7 @@ export class TransactionService {
 
   async estimateTransactionFee(sourcePublicKey: string, operations: number = 1): Promise<string> {
     try {
-      const baseFee = await this.stellarClient.fetchBaseFee();
+      const baseFee = await this.stellarClient!.fetchBaseFee();
       return String(baseFee * operations);
     } catch (error) {
       return this.calculateFee(operations);
@@ -251,14 +253,14 @@ export class TransactionService {
   buildTransaction(sourceAccount: any, operations: any[], options?: TransactionOptions): Transaction {
     const builder = new TransactionBuilder(sourceAccount, {
       fee: options?.fee || '100',
-      networkPassphrase: this.stellarClient.getNetworkPassphrase(),
+      networkPassphrase: this.stellarClient!.getNetworkPassphrase(),
       timebounds: options?.timeBounds,
     });
 
     operations.forEach(op => builder.addOperation(op));
 
     if (options?.memo) {
-      builder.addMemo(Operation.createTextMemo(options.memo));
+      builder.addMemo(Memo.text(options.memo));
     }
 
     return builder.setTimeout(30).build();
@@ -269,7 +271,7 @@ export class TransactionService {
       signers.forEach(signer => transaction.sign(signer));
 
       const response = await StellarErrorHandler.withRetry(async () => {
-        return await this.stellarClient.submitTransaction(transaction);
+        return await this.stellarClient!.submitTransaction(transaction);
       });
 
       return {
@@ -286,4 +288,4 @@ export class TransactionService {
   }
 }
 
-export const transactionService = new TransactionService();
+// Remove default instance export to avoid circular dependencies
