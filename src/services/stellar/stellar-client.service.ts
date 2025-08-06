@@ -1,9 +1,6 @@
 import { 
   Horizon, 
-  AccountResponse, 
-  Transaction, 
-  SubmitTransactionResponse,
-  ServerApi
+  Transaction
 } from '@stellar/stellar-sdk';
 import { STELLAR_CONFIG } from '@/config/stellar-config';
 import { StellarError } from './error-handler.service';
@@ -31,7 +28,7 @@ export class StellarClientService {
     this.friendbotUrl = stellarConfig.friendbotUrl;
   }
 
-  async getAccount(publicKey: string): Promise<AccountResponse> {
+  async getAccount(publicKey: string): Promise<any> {
     try {
       return await this.server.loadAccount(publicKey);
     } catch (error) {
@@ -39,7 +36,7 @@ export class StellarClientService {
     }
   }
 
-  async submitTransaction(transaction: Transaction): Promise<SubmitTransactionResponse> {
+  async submitTransaction(transaction: Transaction): Promise<any> {
     try {
       return await this.server.submitTransaction(transaction);
     } catch (error) {
@@ -57,7 +54,7 @@ export class StellarClientService {
     }
   }
 
-  async getTransactions(publicKey: string, limit = 10): Promise<ServerApi.CollectionPage<ServerApi.TransactionRecord>> {
+  async getTransactions(publicKey: string, limit = 10): Promise<any> {
     try {
       return await this.server
         .transactions()
@@ -70,7 +67,7 @@ export class StellarClientService {
     }
   }
 
-  async getPayments(publicKey: string, limit = 10): Promise<ServerApi.CollectionPage<ServerApi.PaymentOperationRecord>> {
+  async getPayments(publicKey: string, limit = 10): Promise<any> {
     try {
       return await this.server
         .payments()
@@ -111,7 +108,7 @@ export class StellarClientService {
       await this.getAccount(publicKey);
       return true;
     } catch (error) {
-      if (error instanceof StellarError && error.originalError.message.includes('404')) {
+      if (error instanceof StellarError && error.originalError?.message.includes('404')) {
         return false;
       }
       throw error;
@@ -119,4 +116,4 @@ export class StellarClientService {
   }
 }
 
-export const stellarClientService = new StellarClientService();
+// Remove default instance export to avoid circular dependencies
