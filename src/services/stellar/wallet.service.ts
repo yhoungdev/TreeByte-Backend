@@ -1,6 +1,6 @@
 import { Keypair } from '@stellar/stellar-sdk';
 import { encrypt, decrypt } from '@/utils/encryption';
-import { AccountService, accountService } from './account.service';
+import { AccountService } from './account.service';
 import { StellarError } from './error-handler.service';
 
 export interface StellarWallet {
@@ -19,7 +19,9 @@ export interface DecryptedWallet {
 }
 
 export class WalletService {
-  constructor(private accountService: AccountService = accountService) {}
+  constructor(private accountService?: AccountService) {
+    this.accountService = accountService || new AccountService();
+  }
 
   generateWallet(passphrase: string): StellarWallet {
     try {
@@ -42,9 +44,9 @@ export class WalletService {
     const wallet = this.generateWallet(passphrase);
     
     try {
-      await this.accountService.fundAccount(wallet.publicKey);
+      await this.accountService!.fundAccount(wallet.publicKey);
       
-      await this.accountService.waitForAccount(wallet.publicKey);
+      await this.accountService!.waitForAccount(wallet.publicKey);
       
       return {
         ...wallet,
@@ -112,13 +114,13 @@ export class WalletService {
   }
 
   async importWallet(secretKey: string, passphrase: string): Promise<StellarWallet> {
-    if (!this.accountService.validateSecretKey(secretKey)) {
+    if (!this.accountService!.validateSecretKey(secretKey)) {
       throw new StellarError('Invalid secret key format');
     }
 
     const wallet = this.createWalletFromSecret(secretKey, passphrase);
     
-    const exists = await this.accountService.accountExists(wallet.publicKey);
+    const exists = await this.accountService!.accountExists(wallet.publicKey);
     if (!exists) {
       throw new StellarError('Account does not exist on the network', undefined, {
         publicKey: wallet.publicKey
@@ -139,7 +141,7 @@ export class WalletService {
   }
 
   async getWalletInfo(publicKey: string) {
-    const exists = await this.accountService.accountExists(publicKey);
+    const exists = await this.accountService!.accountExists(publicKey);
     
     if (!exists) {
       return {
@@ -149,8 +151,8 @@ export class WalletService {
       };
     }
 
-    const balances = await this.accountService.getBalances(publicKey);
-    const nativeBalance = await this.accountService.getNativeBalance(publicKey);
+    const balances = await this.accountService!.getBalances(publicKey);
+    const nativeBalance = await this.accountService!.getNativeBalance(publicKey);
 
     return {
       exists: true,
@@ -182,4 +184,4 @@ export class WalletService {
   }
 }
 
-export const walletService = new WalletService();
+// Remove default instance export to avoid circular dependencies
