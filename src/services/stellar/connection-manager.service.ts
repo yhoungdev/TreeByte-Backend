@@ -258,4 +258,4 @@ export class ConnectionManagerService {
   }
 }
 
-export const connectionManager = new ConnectionManagerService();
+// Remove default instance export to avoid circular dependencies
