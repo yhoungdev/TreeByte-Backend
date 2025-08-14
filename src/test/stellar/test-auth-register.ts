@@ -1,7 +1,7 @@
 import { fetch } from "undici";
 import { accountService } from "@/services/stellar";
 
-const API_URL = "http://localhost:3000";
+const API_URL = process.env.API_URL || "http://localhost:3000";
 
 interface RegisterResponse {
   message: string;
@@ -12,58 +12,229 @@ interface RegisterResponse {
   };
 }
 
-(async () => {
-  console.log("\n🔐 Testing /auth/register");
-  console.log("───────────────────────────────");
+interface TestResult {
+  success: boolean;
+  error?: string;
+  data?: {
+    email: string;
+    publicKey: string;
+    balances: any[];
+  };
+}
 
-  const res = await fetch(`${API_URL}/auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email: `user-${Date.now()}@test.com`,
-      authMethod: "email",
-    }),
-  });
+interface BalanceTestResult {
+  success: boolean;
+  error?: string;
+  balances?: any[];
+}
 
-  const raw = await res.text(); // ✅ read once only
-  let data: RegisterResponse;
+class AuthRegisterTester {
+  private testEmail: string;
+  private publicKey?: string;
 
-  try {
-    data = JSON.parse(raw) as RegisterResponse;
-  } catch (err) {
-    console.error("❌ Response is not valid JSON. Raw response:\n", raw);
-    console.error(`\n📦 Status code: ${res.status}`);
-    process.exit(1);
+  constructor() {
+    this.testEmail = `user-${Date.now()}@test.com`;
   }
 
-  if (res.status !== 201) {
-    console.error("❌ Registration failed:", data);
-    process.exit(1);
-  }
+  async runTest(): Promise<TestResult> {
+    try {
+      const registerResult = await this.testRegistration();
+      if (!registerResult.success) {
+        return registerResult;
+      }
 
-  const { email, publicKey } = data.user;
+      const fundingResult = await this.testStellarFunding();
+      if (!fundingResult.success) {
+        return fundingResult;
+      }
 
-  console.log(`✅ User registered: ${email}`);
-  console.log(`🔑 Public key: ${publicKey}`);
+      const balanceResult = await this.testBalanceRetrieval();
+      if (!balanceResult.success) {
+        return balanceResult;
+      }
 
-  console.log("\n💸 Funding Stellar account...");
-  await accountService.fundAccount(publicKey);
-  console.log("✅ Account funded.");
-
-  // Wait for account to be available
-  console.log("⏳ Waiting for account to be available...");
-  await accountService.waitForAccount(publicKey);
-
-  const balances = await accountService.getBalances(publicKey);
-  console.log(`📊 Balances:`);
-
-  for (const b of balances) {
-    if (b.asset_code && b.asset_issuer) {
-      console.log(`• ${b.balance} ${b.asset_code}`);
-    } else {
-      console.log(`• ${b.balance} ${b.asset_type}`); // e.g., native (XLM)
+      return {
+        success: true,
+        data: {
+          email: this.testEmail,
+          publicKey: this.publicKey!,
+          balances: balanceResult.balances || []
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      };
+    } finally {
+      await this.cleanup();
     }
   }
 
-  console.log("\n✅ Registration + Stellar integration test passed.\n");
-})();
+  private async testRegistration(): Promise<TestResult> {
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: this.testEmail,
+        authMethod: "email",
+      }),
+    });
+
+    const rawResponse = await response.text();
+    
+    if (!this.isValidJson(rawResponse)) {
+      return {
+        success: false,
+        error: `Invalid JSON response. Status: ${response.status}, Body: ${rawResponse}`
+      };
+    }
+
+    const data = JSON.parse(rawResponse) as RegisterResponse;
+
+    if (response.status !== 201) {
+      return {
+        success: false,
+        error: `Registration failed with status ${response.status}: ${JSON.stringify(data)}`
+      };
+    }
+
+    if (!this.isValidRegisterResponse(data)) {
+      return {
+        success: false,
+        error: `Invalid response structure: ${JSON.stringify(data)}`
+      };
+    }
+
+    this.publicKey = data.user.publicKey;
+    return { success: true };
+  }
+
+  private async testStellarFunding(): Promise<TestResult> {
+    if (!this.publicKey) {
+      return { success: false, error: "Public key not available for funding" };
+    }
+
+    try {
+      await accountService.fundAccount(this.publicKey);
+      await accountService.waitForAccount(this.publicKey);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Stellar funding failed: ${error instanceof Error ? error.message : String(error)}`
+      };
+    }
+  }
+
+  private async testBalanceRetrieval(): Promise<BalanceTestResult> {
+    if (!this.publicKey) {
+      return { success: false, error: "Public key not available for balance retrieval" };
+    }
+
+    try {
+      const balances = await accountService.getBalances(this.publicKey);
+      
+      if (!Array.isArray(balances) || balances.length === 0) {
+        return {
+          success: false,
+          error: "No balances found or invalid balance structure"
+        };
+      }
+
+      const hasValidBalances = balances.every(balance => 
+        typeof balance.balance === 'string' && 
+        (balance.asset_type || (balance.asset_code && balance.asset_issuer))
+      );
+
+      if (!hasValidBalances) {
+        return {
+          success: false,
+          error: "Invalid balance structure detected"
+        };
+      }
+
+      return { 
+        success: true, 
+        balances
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Balance retrieval failed: ${error instanceof Error ? error.message : String(error)}`
+      };
+    }
+  }
+
+  private isValidJson(text: string): boolean {
+    try {
+      JSON.parse(text);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private isValidRegisterResponse(data: any): data is RegisterResponse {
+    return (
+      data &&
+      typeof data.message === 'string' &&
+      data.user &&
+      typeof data.user.email === 'string' &&
+      typeof data.user.authMethod === 'string' &&
+      typeof data.user.publicKey === 'string'
+    );
+  }
+
+  private async cleanup(): Promise<void> {
+    try {
+    } catch (error) {
+      console.warn(`Cleanup warning: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // Utility method for formatting balance output
+  private formatBalance(balance: any): string {
+    if (balance.asset_code && balance.asset_issuer) {
+      return `${balance.balance} ${balance.asset_code}`;
+    }
+    return `${balance.balance} ${balance.asset_type || 'XLM'}`;
+  }
+}
+
+// Test execution
+async function runAuthRegisterTest(): Promise<void> {
+  console.log("\n🔐 Testing /auth/register");
+  console.log("───────────────────────────────");
+
+  const tester = new AuthRegisterTester();
+  const result = await tester.runTest();
+
+  if (result.success && result.data) {
+    console.log(`✅ User registered: ${result.data.email}`);
+    console.log(`🔑 Public key: ${result.data.publicKey}`);
+    console.log("📊 Balances:");
+    
+    result.data.balances.forEach(balance => {
+      const formatted = balance.asset_code && balance.asset_issuer
+        ? `${balance.balance} ${balance.asset_code}`
+        : `${balance.balance} ${balance.asset_type || 'XLM'}`;
+      console.log(`  • ${formatted}`);
+    });
+    
+    console.log("\n✅ Registration + Stellar integration test passed.\n");
+  } else {
+    console.error(`❌ Test failed: ${result.error}`);
+    process.exit(1);
+  }
+}
+
+
+export { AuthRegisterTester, runAuthRegisterTest };
+
+if (require.main === module) {
+  runAuthRegisterTest().catch((error) => {
+    console.error("❌ Unexpected error:", error);
+    process.exit(1);
+  });
+}
