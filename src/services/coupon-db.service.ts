@@ -1,4 +1,4 @@
-import type { 
+import { 
   Coupon, 
   CouponStatus, 
   CreateCouponDTO, 
@@ -18,7 +18,7 @@ const mapRowToCoupon = (r: any): Coupon => ({
   user_id: r.user_id,
   project_id: r.project_id,
   purchase_id: Number(r.purchase_id),
-  token_id: Number(r.token_id),
+  token_id: BigInt(r.token_id),
   metadata_url: r.metadata_url ?? null,
   metadata_hash: r.metadata_hash ?? null,
   contract_address: r.contract_address ?? null,
@@ -98,6 +98,12 @@ export const createCouponDbService = (db: Db) => {
       sql += ' ORDER BY created_at DESC';
     }
 
+    // Add filters
+    if (options?.filters?.status) {
+      params.push(options.filters.status);
+      sql += ` AND status = $${params.length}`;
+    }
+    
     // Add pagination
     if (options?.limit) {
       params.push(options.limit);
@@ -150,12 +156,19 @@ export const createCouponDbService = (db: Db) => {
     const params: unknown[] = [];
 
     // Add ordering
-    if (options?.sort_by) {
-      const direction = options.sort_order === 'asc' ? 'ASC' : 'DESC';
-      sql += ` ORDER BY ${options.sort_by} ${direction}`;
-    } else {
-      sql += ' ORDER BY expiration_date ASC';
-    }
+    const sortColumn = (() => { switch (options?.sort_by) {
+       case 'created_at':
+        case 'expiration_date':
+        case 'token_id':
+        case 'status':
+            return options.sort_by;
+        default:
+            return 'created_at';
+        }
+      })();
+      const direction = options?.sort_order === 'asc' ? 'ASC' : 'DESC';
+      sql += ` ORDER BY ${sortColumn} ${direction}`;
+
 
     // Add pagination
     if (options?.limit) {
@@ -188,6 +201,15 @@ export const createCouponDbService = (db: Db) => {
     let sql = "SELECT * FROM coupons WHERE status = 'expired' OR expiration_date <= NOW()";
     const params: unknown[] = [];
 
+    const where: string[] = ['user_id = $1'];
+    if (options?.filters?.status) { params.push(options.filters.status); where.push(`status = $${params.length}`); }
+    if (options?.filters?.activity_type) { params.push(options.filters.activity_type); where.push(`activity_type = $${params.length}`); }
+    if (options?.filters?.expires_before) { params.push(options.filters.expires_before); where.push(`expiration_date < $${params.length}`); }
+    if (options?.filters?.expires_after) { params.push(options.filters.expires_after); where.push(`expiration_date >= $${params.length}`); }
+    if (options?.filters?.token_ids) { params.push(options.filters.token_ids); where.push(`token_id = $${params.length}`); }
+
+    sql = `SELECT * FROM coupons WHERE ${where.join(' AND ')}`;
+
     // Add ordering
     if (options?.sort_by) {
       const direction = options.sort_order === 'asc' ? 'ASC' : 'DESC';
@@ -205,6 +227,7 @@ export const createCouponDbService = (db: Db) => {
         sql += ` OFFSET $${params.length}`;
       }
     }
+
 
     const { rows } = await db.query(sql, params);
     const data = rows.map(mapRowToCoupon);
@@ -234,7 +257,7 @@ export const createCouponDbService = (db: Db) => {
     const params: unknown[] = [];
     const push = (col: string, val: unknown) => { 
       params.push(val); 
-      fields.push(`${col} = ${params.length}`); 
+      fields.push(`${col} = $${params.length}`); 
     };
     
     if ('metadata_url' in patch) push('metadata_url', patch.metadata_url ?? null);
@@ -255,23 +278,19 @@ export const createCouponDbService = (db: Db) => {
     }
     
     params.push(id);
-    const sql = `UPDATE coupons SET ${fields.join(', ')} WHERE id = ${params.length} RETURNING *;`;
+    const sql = `UPDATE coupons SET ${fields.join(', ')} WHERE id = $${params.length} RETURNING *;`;
     const { rows } = await db.query(sql, params);
     if (!rows[0]) throw new Error('Coupon not found or not updated');
     return mapRowToCoupon(rows[0]);
   };
 
+
   const redeemCoupon = async (id: string, location?: string): Promise<Coupon> => {
-    const updateData: UpdateCouponDTO = {
-      status: 'redeemed' as CouponStatus,
-      redeemed_at: new Date().toISOString()
-    };
-
+    let updated = await updateCouponStatus(id, CouponStatus.REDEEMED);
     if (location) {
-      updateData.location = location;
+      updated = await updateCoupon(id, { location });
     }
-
-    return updateCoupon(id, updateData);
+    return updated;
   };
 
   const bulkUpdateExpiredCoupons = async (): Promise<number> => {
@@ -301,25 +320,27 @@ export const createCouponDbService = (db: Db) => {
       expired: 0
     };
 
-    const now = new Date().toISOString();
+    const now = Date.now();
 
     rows.forEach((coupon: any) => {
-      switch (coupon.status) {
-        case 'active':
-          if (coupon.expiration_date <= now) {
-            stats.expired++;
-          } else {
-            stats.active++;
-          }
-          break;
-        case 'redeemed':
-          stats.redeemed++;
-          break;
-        case 'expired':
-          stats.expired++;
-          break;
-      }
-    });
+     const expMillis = new Date(coupon.expiration_date).getTime();
+     const isExpired = Number.isFinite(expMillis) && expMillis <= now;
+     switch (coupon.status) {
+       case 'active':
+         if (isExpired) {
+           stats.expired++;
+         } else {
+           stats.active++;
+         }
+         break;
+       case 'redeemed':
+         stats.redeemed++;
+         break;
+       case 'expired':
+         stats.expired++;
+         break;
+     }
+   });
 
     return stats;
   };

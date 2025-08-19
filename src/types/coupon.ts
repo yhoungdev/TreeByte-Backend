@@ -11,7 +11,7 @@ export interface Coupon {
   project_id: string;
   purchase_id: number;
 
-  token_id: number;
+  token_id: bigint;
   metadata_url: string | null;
   metadata_hash: string | null;
   contract_address: string | null;
@@ -90,7 +90,9 @@ export interface CouponFilters {
   business_name?: string;
   location?: string;
   expired?: boolean; 
-  token_ids?: number[]; 
+  expires_before?: string;
+  expires_after?: string;
+  token_ids?: bigint[]; 
 }
 
 
