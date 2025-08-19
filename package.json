@@ -8,13 +8,21 @@
     "build": "tsc",
     "start": "node -r module-alias/register dist/index.js",
     "clean": "rimraf dist",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:stellar-services": "jest src/services/stellar/__tests__",
     "test:connection:stellar": "ts-node -r tsconfig-paths/register src/test/stellar/test-connection.ts",
     "test:transaction:stellar": "ts-node -r tsconfig-paths/register src/test/stellar/test-transaction-history.ts",
     "test:nft:stellar": "ts-node -r tsconfig-paths/register src/test/stellar/test-nft.ts",
     "test:purchase:nft": "ts-node -r tsconfig-paths/register src/test/stellar/test-purchase-nft.ts",
     "test:register": "ts-node -r tsconfig-paths/register src/test/stellar/test-auth-register.ts",
     "test:trustline": "ts-node -r tsconfig-paths/register src/test/stellar/test-trustline.ts",
-    "test:project-creation": "ts-node -r tsconfig-paths/register src/test/project-creation-integration.test.ts"
+    "test:project-creation": "ts-node -r tsconfig-paths/register src/test/project-creation-integration.test.ts",
+
+    "test:coupon-ipfs": "ts-node -r tsconfig-paths/register src/test/coupon-ipfs-basic.test.ts",
+    "test:coupon-ipfs-manual": "ts-node -r tsconfig-paths/register src/test/manual-coupon-ipfs-tests.ts"
+    "test:coupon-metadata": "ts-node -r tsconfig-paths/register src/test/coupon-metadata.test.ts"
   },
   "keywords": [],
   "author": "Josué Araya",
@@ -48,7 +56,8 @@
     "supabase": "^2.30.4",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   },
   "_moduleAliases": {
     "@": "dist"
