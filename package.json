@@ -21,7 +21,7 @@
     "test:project-creation": "ts-node -r tsconfig-paths/register src/test/project-creation-integration.test.ts",
 
     "test:coupon-ipfs": "ts-node -r tsconfig-paths/register src/test/coupon-ipfs-basic.test.ts",
-    "test:coupon-ipfs-manual": "ts-node -r tsconfig-paths/register src/test/manual-coupon-ipfs-tests.ts"
+    "test:coupon-ipfs-manual": "ts-node -r tsconfig-paths/register src/test/manual-coupon-ipfs-tests.ts",
     "test:coupon-metadata": "ts-node -r tsconfig-paths/register src/test/coupon-metadata.test.ts"
   },
   "keywords": [],
