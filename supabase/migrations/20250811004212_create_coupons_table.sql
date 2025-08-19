@@ -7,7 +7,7 @@ CREATE TABLE coupons (
     project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     purchase_id INTEGER NOT NULL REFERENCES purchases(id) ON DELETE CASCADE,
     
-    token_id INTEGER NOT NULL UNIQUE,
+    token_id BIGINT NOT NULL UNIQUE,
     metadata_url TEXT,
     metadata_hash TEXT,
     contract_address VARCHAR(255),
@@ -33,7 +33,7 @@ CREATE TABLE coupons (
         )
 );
 
-CREATE UNIQUE INDEX idx_coupons_token_id ON coupons(token_id);
+
 CREATE INDEX idx_coupons_user_id ON coupons(user_id);
 CREATE INDEX idx_coupons_project_id ON coupons(project_id);
 CREATE INDEX idx_coupons_purchase_id ON coupons(purchase_id);

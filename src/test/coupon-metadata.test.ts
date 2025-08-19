@@ -1,6 +1,6 @@
 import { CouponMetadataService } from "@/services/coupon-metadata.service";
 import { CouponMetadataUtils } from "@/utils/coupon-metadata-utils";
-import { ActivityType, MetadataGenerationInput } from "@/types/coupon-metadata";
+import { ActivityType, MetadataGenerationInput } from "@/types/coupon";
 
 console.log("🧪 Starting Coupon Metadata Tests");
 
