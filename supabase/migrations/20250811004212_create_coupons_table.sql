@@ -44,3 +44,47 @@ CREATE INDEX idx_coupons_created_at ON coupons(created_at);
 
 CREATE INDEX idx_coupons_user_status ON coupons(user_id, status);
 CREATE INDEX idx_coupons_status_expiration ON coupons(status, expiration_date);
+
+-- coupons_updated_at_trigger.sql
+CREATE OR REPLACE FUNCTION set_updated_at() RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_coupons_set_updated_at ON coupons;
+CREATE TRIGGER trg_coupons_set_updated_at
+BEFORE UPDATE ON coupons
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
+-- create_active_coupons_view.sql
+CREATE OR REPLACE VIEW active_coupons AS
+SELECT *
+FROM coupons
+WHERE status = 'active'
+  AND expiration_date > NOW();
+
+
+-- supabase/migrations/[timestamp]_enable_rls_and_policies_for_coupons.sql
+ALTER TABLE coupons ENABLE ROW LEVEL SECURITY;
+
+-- Example policy: owners can select their coupons
+CREATE POLICY "select_own_coupons"
+ON coupons
+FOR SELECT
+USING (user_id = auth.uid());
+
+-- Example policy: owners can insert their coupons
+CREATE POLICY "insert_own_coupons"
+ON coupons
+FOR INSERT
+WITH CHECK (user_id = auth.uid());
+
+-- Example policy: owners can update their coupons
+CREATE POLICY "update_own_coupons"
+ON coupons
+FOR UPDATE
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
