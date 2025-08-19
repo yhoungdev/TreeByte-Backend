@@ -18,7 +18,7 @@ const mapRowToCoupon = (r: any): Coupon => ({
   user_id: r.user_id,
   project_id: r.project_id,
   purchase_id: Number(r.purchase_id),
-  token_id: BigInt(r.token_id),
+  token_id: r.token_id,
   metadata_url: r.metadata_url ?? null,
   metadata_hash: r.metadata_hash ?? null,
   contract_address: r.contract_address ?? null,
@@ -26,7 +26,6 @@ const mapRowToCoupon = (r: any): Coupon => ({
   business_name: r.business_name ?? null,
   location: r.location ?? null,
   status: r.status,
-  // Fix: expirationDate should always have a value from the database
   expiration_date: r.expiration_date ? new Date(r.expiration_date).toISOString() : (() => {
     throw new Error('Coupon expiration_date is required but missing from database');
   })(),
@@ -78,7 +77,7 @@ export const createCouponDbService = (db: Db) => {
     return rows[0] ? mapRowToCoupon(rows[0]) : null;
   };
 
-  const getCouponByTokenId = async (tokenId: number): Promise<Coupon | null> => {
+  const getCouponByTokenId = async (tokenId: string): Promise<Coupon | null> => {
     const { rows } = await db.query('SELECT * FROM coupons WHERE token_id = $1;', [tokenId]);
     return rows[0] ? mapRowToCoupon(rows[0]) : null;
   };
