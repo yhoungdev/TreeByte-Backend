@@ -1,4 +1,4 @@
-import { ActivityType, CouponMetadataTemplate } from "@/types/coupon-metadata";
+import { ActivityType, CouponMetadataTemplate } from "@/types/coupon";
 import { hotelTemplate } from "./hotel-template";
 import { restaurantTemplate } from "./restaurant-template";
 import { adventureTemplate } from "./adventure-template";

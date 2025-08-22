@@ -1,4 +1,4 @@
-import { CouponMetadata, MetadataValidationResult, ActivityType } from "@/types/coupon-metadata";
+import { CouponMetadata, MetadataValidationResult, ActivityType } from "@/types/coupon";
 
 export class CouponMetadataUtils {
   static validateMetadata(metadata: CouponMetadata): MetadataValidationResult {

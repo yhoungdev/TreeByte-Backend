@@ -1,4 +1,4 @@
-import { CouponMetadataTemplate, ActivityType, CouponAttribute } from "@/types/coupon-metadata";
+import { CouponMetadataTemplate, ActivityType, CouponAttribute } from "@/types/coupon";
 
 export const restaurantTemplate: CouponMetadataTemplate = {
   activity_type: ActivityType.RESTAURANT,

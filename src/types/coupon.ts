@@ -11,7 +11,7 @@ export interface Coupon {
   project_id: string;
   purchase_id: number;
 
-  token_id: number;
+  token_id: String | bigint;
   metadata_url: string | null;
   metadata_hash: string | null;
   contract_address: string | null;
@@ -90,7 +90,9 @@ export interface CouponFilters {
   business_name?: string;
   location?: string;
   expired?: boolean; 
-  token_ids?: number[]; 
+  expires_before?: string;
+  expires_after?: string;
+  token_ids?: string[]; 
 }
 
 
@@ -157,16 +159,17 @@ export interface CouponWithRelations extends Coupon {
 
 
 export interface CouponValidationRules {
-  token_id: {
-    required: true;
-    type: 'number';
-    unique: true;
-  };
+  token_id: { 
+    required: true; 
+    type: 'string'; 
+  }
+
   expiration_date: {
     required: true;
     type: 'date';
     future: true;
   };
+
   redemption_code: {
     required: false;
     type: 'string';
