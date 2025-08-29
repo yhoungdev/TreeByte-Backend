@@ -1,8 +1,9 @@
 import pinataSDK from "@pinata/sdk";
+import { config } from '@/config/app-config';
 
 const pinata = new pinataSDK({
-  pinataApiKey: process.env.PINATA_API_KEY!,
-  pinataSecretApiKey: process.env.PINATA_SECRET_API_KEY!,
+  pinataApiKey: config.external.pinata.apiKey || '',
+  pinataSecretApiKey: config.external.pinata.secretKey || '',
 });
 
 export interface IPFSUploadResult {
@@ -34,9 +35,10 @@ export interface CouponMetadata {
 export const uploadToIPFS = async (metadata: object): Promise<IPFSUploadResult> => {
   try {
     const result = await pinata.pinJSONToIPFS(metadata);
+    const preferredGateway = config.external.pinata.gatewayUrl.replace(/\/$/, '');
     return {
       ipfsHash: result.IpfsHash,
-      ipfsUrl: `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`,
+      ipfsUrl: `${preferredGateway}/ipfs/${result.IpfsHash}`,
       success: true,
     };
   } catch (err) {
@@ -72,10 +74,17 @@ export const uploadCouponMetadataToIPFS = async (
     };
 
     const result = await pinata.pinJSONToIPFS(enhancedMetadata, options);
+    const gateways = [
+      config.external.pinata.gatewayUrl,
+      ...config.external.pinata.gateways,
+    ].map(g => g.replace(/\/$/, ''));
+
+    // pick first available as simple fallback selection (URL composition only)
+    const primary = gateways[0] || 'https://gateway.pinata.cloud';
 
     return {
       ipfsHash: result.IpfsHash,
-      ipfsUrl: `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`,
+      ipfsUrl: `${primary}/ipfs/${result.IpfsHash}`,
       metadataSize,
       uploadTimestamp: timestamp,
       success: true,
