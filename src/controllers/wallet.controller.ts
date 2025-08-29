@@ -4,8 +4,10 @@ import { generateStellarWallet } from '@/services/wallet-service';
 import { walletService, accountService } from '@/services/stellar';
 import { RecoveryService } from '@/services/recovery.service';
 import { MailerService } from '../services/mailer.service';
+import { UserRepository } from '@/repositories/user.repository';
 
 const recoveryService = new RecoveryService(new MailerService());
+const userRepository = new UserRepository();
 
 // ✅ Create wallet (invisible or external)
 export const createWallet = async (
@@ -19,19 +21,8 @@ export const createWallet = async (
       return res.status(400).json({ error: 'Email is required' });
     }
 
-    const { data: existing, error: existingError } = await db
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .limit(1)
-      .single();
-
-    if (existingError && existingError.code !== 'PGRST116') {
-      console.error(existingError);
-      return res.status(500).json({ error: 'Error checking existing wallet' });
-    }
-
-    if (existing) {
+  const existing = await userRepository.findByEmail(email);
+  if (existing) {
       return res.status(409).json({ error: 'Wallet already exists for this email' });
     }
 
@@ -41,19 +32,12 @@ export const createWallet = async (
         return res.status(400).json({ error: 'Invalid publicKey format' });
       }
 
-      const { error: insertError } = await db.from('users').insert([
-        {
-          email,
-          public_key: publicKey,
-          secret_key_enc: null,
-          auth_method: 'external',
-        },
-      ]);
-
-      if (insertError) {
-        console.error(insertError);
-        return res.status(500).json({ error: 'Error inserting external wallet' });
-      }
+      await userRepository.create({
+        email,
+        public_key: publicKey,
+        secret_key_enc: null,
+        auth_method: 'external',
+      } as any);
 
       return res.status(201).json({ publicKey, source: 'external' });
     }
@@ -64,20 +48,12 @@ export const createWallet = async (
     }
 
     const { publicKey: newPublicKey, encryptedSecret } = generateStellarWallet(passphrase);
-
-    const { error: insertGeneratedError } = await db.from('users').insert([
-      {
-        email,
-        public_key: newPublicKey,
-        secret_key_enc: encryptedSecret,
-        auth_method: 'invisible',
-      },
-    ]);
-
-    if (insertGeneratedError) {
-      console.error(insertGeneratedError);
-      return res.status(500).json({ error: 'Error inserting generated wallet' });
-    }
+    await userRepository.create({
+      email,
+      public_key: newPublicKey,
+      secret_key_enc: encryptedSecret,
+      auth_method: 'invisible',
+    } as any);
 
     return res.status(201).json({ publicKey: newPublicKey, source: 'generated' });
   } catch (error) {
