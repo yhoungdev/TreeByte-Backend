@@ -31,13 +31,11 @@ export interface TrustlineStatus {
 
 export class TrustlineService {
   constructor(
-    private transactionService?: TransactionService,
-    private accountService?: AccountService,
-    private assetService?: AssetService
+  private transactionService: TransactionService = new TransactionService(),
+  private accountService: AccountService = new AccountService(),
+  private assetService: AssetService = new AssetService()
   ) {
-    this.transactionService = transactionService || new TransactionService();
-    this.accountService = accountService || new AccountService();
-    this.assetService = assetService || new AssetService();
+  // Dependencies are initialized via default params to ensure they are always defined
   }
 
   async createTrustline(params: CreateTrustlineParams) {

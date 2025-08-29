@@ -3,6 +3,7 @@ import {
   Transaction
 } from '@stellar/stellar-sdk';
 import { STELLAR_CONFIG } from '@/config/stellar-config';
+import { requireConfig } from '@/utils/config-accessor';
 import { StellarError } from './error-handler.service';
 
 export interface StellarConfig {
@@ -17,6 +18,11 @@ export class StellarClientService {
   private friendbotUrl?: string;
 
   constructor(config?: StellarConfig) {
+    // Ensure critical stellar config is present
+    requireConfig([
+      'stellar.horizonUrl',
+      'stellar.networkPassphrase',
+    ]);
     const stellarConfig = config || {
       horizonUrl: STELLAR_CONFIG.horizonURL,
       networkPassphrase: STELLAR_CONFIG.networkPassphrase,

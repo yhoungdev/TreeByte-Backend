@@ -1,17 +1,8 @@
-export const STELLAR_NETWORK = 'testnet' as const;
+import { config } from '@/config/app-config';
 
 export const STELLAR_CONFIG = {
-
-  testnet: {
-    horizonURL: 'https://horizon-testnet.stellar.org',
-    friendbotURL: 'https://friendbot.stellar.org',
-    networkPassphrase: 'Test SDF Network ; September 2015',
-    fundingAccountSecret: process.env.STELLAR_FUNDING_ACCOUNT_SECRET || '',
-  },
-  mainnet: {
-    horizonURL: 'https://horizon.stellar.org',
-    friendbotURL: '',
-    networkPassphrase: 'Public Global Stellar Network ; September 2015',
-    fundingAccountSecret: process.env.STELLAR_FUNDING_ACCOUNT_SECRET || '',
-  },
-}[STELLAR_NETWORK];
+  horizonURL: config.stellar.horizonUrl,
+  friendbotURL: config.stellar.friendbotUrl || '',
+  networkPassphrase: config.stellar.networkPassphrase,
+  fundingAccountSecret: config.stellar.fundingAccountSecret || '',
+};

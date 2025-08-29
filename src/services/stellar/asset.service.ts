@@ -41,11 +41,10 @@ export interface AssetTransferParams {
 
 export class AssetService {
   constructor(
-    private transactionService?: TransactionService,
-    private accountService?: AccountService
+  private transactionService: TransactionService = new TransactionService(),
+  private accountService: AccountService = new AccountService()
   ) {
-    this.transactionService = transactionService || new TransactionService();
-    this.accountService = accountService || new AccountService();
+  // Dependencies are initialized via default params to ensure they are always defined
   }
 
   createAsset(code: string, issuer: string): Asset {

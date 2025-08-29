@@ -1,7 +1,7 @@
 import { fetch } from "undici";
 import { accountService } from "@/services/stellar";
 
-const API_URL = process.env.API_URL || "http://localhost:3000";
+const API_URL = process.env.API_URL as string;
 
 interface RegisterResponse {
   message: string;

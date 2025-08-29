@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { config } from '@/config/app-config';
 
 interface MailAttachmentOptions {
   to: string;
@@ -13,12 +14,14 @@ export class MailerService {
   private transporter;
 
   constructor() {
+    const { service, host, port, secure, user, pass } = config.mailer;
+    // Prefer explicit SMTP host/port if provided; otherwise use service
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.MAIL_USER!,
-        pass: process.env.MAIL_PASS!,
-      },
+      service: host ? undefined : service,
+      host: host || undefined,
+      port: host && port ? port : undefined,
+      secure: host && typeof secure === 'boolean' ? secure : undefined,
+      auth: user && pass ? { user, pass } : undefined,
     });
   }
 
@@ -31,7 +34,7 @@ export class MailerService {
     content,
   }: MailAttachmentOptions) {
     await this.transporter.sendMail({
-      from: `"TreeByte" <${process.env.MAIL_USER}>`,
+  from: `"TreeByte" <${config.mailer.user || 'no-reply@treebyte.local'}>`,
       to,
       subject,
       text,

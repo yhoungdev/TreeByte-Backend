@@ -1,8 +1,7 @@
-import 'module-alias/register';
-
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { config as appConfig } from '@/config/app-config';
 
 import treeRoutes from './routes/tree.routes';
 import transactionHistoryRoutes from './routes/transaction-history.routes'; 
@@ -13,8 +12,13 @@ import projectRoutes from '@/routes/project.routes';
 import buyTokenRoutes from '@/routes/buy-token.route'; 
 dotenv.config();
 
+// Basic config status log without sensitive values
+console.log(
+  `Starting server in ${appConfig.server.environment} mode; Horizon: ${appConfig.stellar.horizonUrl}`
+);
+
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = appConfig.server.port;
 
 app.use(cors());
 app.use(express.json());
