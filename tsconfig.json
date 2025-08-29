@@ -12,7 +12,7 @@
     "paths": {
        "@/*": ["./*"]
     },
-    "types": ["node", "express"]
+  "types": ["node", "express"]
   },
   "include": ["src"],
   "exclude": ["node_modules"]

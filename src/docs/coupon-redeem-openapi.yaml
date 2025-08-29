@@ -1,0 +1,79 @@
+openapi: 3.0.3
+info:
+  title: Coupon Redemption API
+  version: 1.0.0
+paths:
+  /api/coupon/redeem/{id}:
+    post:
+      summary: Redeem an NFT coupon
+      description: Validates coupon ownership and status, checks on-chain validity, redeems the coupon via Soroban, and updates the database.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Coupon UUID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  format: uuid
+                redemptionLocation:
+                  type: string
+                redemptionNotes:
+                  type: string
+                businessVerification:
+                  type: string
+              required: [userId]
+      responses:
+        '200':
+          description: Coupon redeemed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  couponId:
+                    type: string
+                    format: uuid
+                  tokenId:
+                    type: string
+                  redemptionDate:
+                    type: string
+                    format: date-time
+                  transactionHash:
+                    type: string
+                  businessInfo:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        nullable: true
+                      location:
+                        type: string
+                        nullable: true
+                  confirmationCode:
+                    type: string
+        '400':
+          description: Bad request / validation error
+        '403':
+          description: Coupon not owned by user
+        '404':
+          description: Coupon not found
+        '409':
+          description: Already redeemed or on-chain invalid
+        '410':
+          description: Coupon expired
+        '429':
+          description: Rate limited
+        '500':
+          description: Contract call or database update failed
