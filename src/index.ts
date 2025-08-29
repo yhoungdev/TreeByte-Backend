@@ -10,6 +10,7 @@ import authRoutes from '@/routes/auth.routes';
 import walletRoutes from '@/routes/wallets.routes';
 import projectRoutes from '@/routes/project.routes';
 import buyTokenRoutes from '@/routes/buy-token.route'; 
+import couponRoutes from '@/routes/coupon.routes';
 dotenv.config();
 
 // Basic config status log without sensitive values
@@ -29,6 +30,7 @@ app.use('/api/health', healthRoutes);
 app.use('/auth', authRoutes); 
 app.use('/api/wallet', walletRoutes);
 app.use('/api/token', buyTokenRoutes);
+app.use('/api', couponRoutes);
 app.use('/api/projects', projectRoutes)
 app.get('/', (_req, res) => {
   res.send('TreeByte API is running 🌱');

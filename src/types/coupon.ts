@@ -24,6 +24,7 @@ export interface Coupon {
   expiration_date: string;
   redemption_code: string | null;
   redeemed_at: string | null; 
+  redemption_tx_hash?: string | null;
   
   created_at: string;
   updated_at: string; 
@@ -63,6 +64,7 @@ export interface UpdateCouponDTO {
   expiration_date?: string;
   redemption_code?: string;
   redeemed_at?: string; 
+  redemption_tx_hash?: string | null;
 }
 
 
