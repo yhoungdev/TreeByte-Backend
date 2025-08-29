@@ -106,6 +106,21 @@ npm run start
 
 ---
 
+## 📘 Coupon Redemption Endpoint
+
+Route: `POST /api/coupon/redeem/:id`
+
+Body JSON:
+
+- userId (uuid, required)
+- redemptionLocation (string, optional)
+- redemptionNotes (string, optional)
+- businessVerification (string, optional)
+
+See `src/docs/coupon-redeem-openapi.yaml` for full schema and responses.
+
+---
+
 📬 Contact & Collaborations
 
 Want to contribute, collaborate, or learn more?
