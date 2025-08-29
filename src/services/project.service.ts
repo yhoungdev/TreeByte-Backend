@@ -1,6 +1,8 @@
 import db from "@/lib/db/db";
 import { uploadToIPFS } from "@/lib/ipfs/upload-to-ipfs";
 import { sorobanDeploymentService } from "@/services/soroban-deployment.service";
+import { ProjectRepository } from '@/repositories/project.repository';
+import type { Project } from '@/types/database';
 
 type ProjectDTO = {
   name: string;
@@ -19,6 +21,8 @@ export type PaginatedResult<T> = {
   page: number;
   limit: number;
 };
+
+const projectRepository = new ProjectRepository();
 
 export const registerProjectService = async (project: ProjectDTO) => {
   let ipfsResult;
@@ -43,23 +47,17 @@ export const registerProjectService = async (project: ProjectDTO) => {
       transaction_hash: contractDeployment.transactionHash,
     };
 
-    const { data, error } = await db
-      .from("projects")
-      .insert([projectWithMetadata])
-      .select()
-      .single();
-
-    if (error) {
-      console.error("Database insertion error:", error);
+    const created = await projectRepository.create(projectWithMetadata as unknown as Partial<Project>);
+    if (!created) {
       throw new Error("Error inserting project into database");
     }
 
     return {
-      ...data,
+      ...created,
       contract_address: contractDeployment.contractAddress,
       issuer_public_key: contractDeployment.issuerPublicKey,
       transaction_hash: contractDeployment.transactionHash,
-    };
+    } as any;
 
   } catch (error) {
     console.error("Project registration failed:", error);
@@ -79,63 +77,19 @@ export const registerProjectService = async (project: ProjectDTO) => {
 };
 
 export const getProjectByIdService = async (id: string): Promise<ProjectDTO | null> => {
-  const { data, error } = await db
-    .from("projects")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (error && error.code !== "PGRST116") { 
-    console.error("Supabase fetch error:", error);
-    throw new Error("Failed to fetch project.");
-  }
-
-  return data;
+  return (await projectRepository.findById(id)) as unknown as ProjectDTO | null;
 };
 
 
 export const getAllProjectsService = async (): Promise<ProjectDTO[]> => {
-  const { data, error } = await db
-    .from("projects")
-    .select("*");
-
-  if (error) {
-    console.error("Supabase fetch error:", error);
-    throw new Error("Failed to fetch all projects.");
-  }
-
-  return data || [];
+  const projects = await projectRepository.findMany();
+  return (projects || []) as unknown as ProjectDTO[];
 };
 
 export const getPaginatedProjectsService = async (
   page: number,
   limit: number
 ): Promise<PaginatedResult<ProjectDTO>> => {
-  const offset = (page - 1) * limit;
-
-  const { count, error: countError } = await db
-    .from("projects")
-    .select("*", { count: "exact", head: true });
-
-  if (countError) {
-    console.error("Supabase count error:", countError);
-    throw new Error("Failed to count projects.");
-  }
-
-  const { data, error } = await db
-    .from("projects")
-    .select("*")
-    .range(offset, offset + limit - 1);
-
-  if (error) {
-    console.error("Supabase paginated fetch error:", error);
-    throw new Error("Failed to fetch paginated projects.");
-  }
-
-  return {
-    data: data || [],
-    total: count || 0,
-    page,
-    limit,
-  };
+  const { data, total } = await projectRepository.paginateProjects(page, limit);
+  return { data: data as unknown as ProjectDTO[], total, page, limit };
 };
