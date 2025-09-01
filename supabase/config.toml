@@ -7,8 +7,6 @@ project_id = "TreeByte-Backend"
 [api]
 enabled = true
 # Port to use for the API URL.
-
-[db.port]
 port = 54321
 # Schemas to expose in your API. Tables, views and stored procedures in this schema will get API
 # endpoints. `public` and `graphql_public` schemas are included by default.
@@ -19,10 +17,7 @@ extra_search_path = ["public", "extensions"]
 # for accidental or malicious requests.
 max_rows = 1000
 
-[api.tls]
-# Enable HTTPS endpoints locally using a self-signed certificate.
-enabled = false
-
+[db]
 # Port to use for the local database URL.
 port = 54322
 # Port used by db diff command to initialize the shadow database.
