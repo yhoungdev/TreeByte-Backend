@@ -132,6 +132,12 @@ export class CouponMetadataUtils {
     const displayNames: Record<ActivityType, string> = {
       [ActivityType.HOTEL]: 'Hotel Accommodation',
       [ActivityType.RESTAURANT]: 'Restaurant & Dining',
+      [ActivityType.TOUR]: 'Guided Tours',
+      [ActivityType.TRANSPORT]: 'Transportation',
+      [ActivityType.ATTRACTION]: 'Tourist Attractions',
+      [ActivityType.EXPERIENCE]: 'Local Experiences',
+      [ActivityType.SHOPPING]: 'Shopping & Markets',
+      [ActivityType.ENTERTAINMENT]: 'Entertainment',
       [ActivityType.ADVENTURE]: 'Adventure & Tours',
       [ActivityType.CULTURAL]: 'Cultural Experience'
     };
