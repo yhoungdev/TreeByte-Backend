@@ -82,6 +82,11 @@ export const createCouponDbService = (db: Db) => {
     return rows[0] ? mapRowToCoupon(rows[0]) : null;
   };
 
+  const findCouponByPurchaseId = async (purchaseId: number): Promise<Coupon | null> => {
+    const { rows } = await db.query('SELECT * FROM coupons WHERE purchase_id = $1;', [purchaseId]);
+    return rows[0] ? mapRowToCoupon(rows[0]) : null;
+  };
+
   const getCouponsByUserId = async (
     userId: string,
     options?: CouponQueryOptions
@@ -348,6 +353,7 @@ export const createCouponDbService = (db: Db) => {
     createCoupon,
     getCouponById,
     getCouponByTokenId,
+    findCouponByPurchaseId,
     getCouponsByUserId,
     updateCouponStatus,
     getActiveCoupons,

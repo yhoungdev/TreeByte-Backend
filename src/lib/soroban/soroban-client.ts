@@ -63,3 +63,36 @@ export const redeemCouponOnChain = async ({ tokenId, redeemer }: { tokenId: stri
   const txHash = `REDEEM_${tokenId}_${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
   return { txHash, networkPassphrase: stellarClientService.getNetworkPassphrase(), status: 'success', tokenId, redeemer };
 };
+
+// Mint coupon on-chain (mocked), returning token ID and contract details
+export const mintCouponOnChain = async ({ 
+  ownerPublicKey, 
+  metadataUrl, 
+  expirationDate 
+}: { 
+  ownerPublicKey: string; 
+  metadataUrl: string; 
+  expirationDate: Date; 
+}) => {
+  // Validate owner exists on Stellar
+  const exists = await accountService.accountExists(ownerPublicKey);
+  if (!exists) {
+    throw new Error(`Owner account ${ownerPublicKey} does not exist`);
+  }
+  
+  // Generate mock token ID and transaction hash
+  const tokenId = Math.floor(Math.random() * 1000000) + 1;
+  const txHash = `MINT_${tokenId}_${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
+  const contractAddress = `CBQHNAXSI55GX2GN6D67GK7BHVPSLJUGZQEU7WJ5LKR5PNUCGLIMAO4K`; // Mock contract address
+  
+  return {
+    tokenId: tokenId.toString(),
+    contractAddress,
+    transactionHash: txHash,
+    networkPassphrase: stellarClientService.getNetworkPassphrase(),
+    status: 'success',
+    owner: ownerPublicKey,
+    metadataUrl,
+    expirationDate: expirationDate.toISOString()
+  };
+};

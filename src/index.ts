@@ -36,7 +36,7 @@ app.get('/', (_req, res) => {
   res.send('TreeByte API is running 🌱');
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🌿 TreeByte server is growing strong on port ${PORT}!`);
   console.log('🌱 Planting trust, one tree at a time.');
   console.log('🌳 Backend running...');
