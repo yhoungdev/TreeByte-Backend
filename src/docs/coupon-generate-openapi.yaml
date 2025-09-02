@@ -1,0 +1,289 @@
+openapi: 3.0.3
+info:
+  title: Coupon Generation API
+  version: 1.0.0
+  description: API for generating NFT coupons after token purchase
+paths:
+  /api/coupon/generate:
+    post:
+      summary: Generate an NFT coupon after token purchase
+      description: |
+        Validates user authorization and purchase ownership, prevents duplicates, builds metadata, uploads to IPFS, 
+        mints coupon on Soroban blockchain, and persists coupon in database with active status.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  format: uuid
+                  description: UUID of the user who made the purchase
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                projectId:
+                  type: string
+                  format: uuid
+                  description: UUID of the project for which tokens were purchased
+                  example: "987fcdeb-51d2-43e8-b456-789012345678"
+                purchaseId:
+                  type: integer
+                  minimum: 1
+                  description: Unique ID of the purchase transaction
+                  example: 12345
+                businessInfo:
+                  type: object
+                  description: Information about the business offering the coupon
+                  properties:
+                    name:
+                      type: string
+                      description: Business name
+                      example: "Costa Rican Adventure Tours"
+                    address:
+                      type: string
+                      description: Business address
+                      example: "123 Jungle Road, Manuel Antonio, Costa Rica"
+                    region:
+                      type: string
+                      description: Geographic region
+                      example: "Central Pacific"
+                    discount:
+                      type: object
+                      properties:
+                        percentage:
+                          type: number
+                          minimum: 1
+                          maximum: 100
+                          example: 15
+                        amount:
+                          type: number
+                          minimum: 0
+                          example: 25.00
+                        currency:
+                          type: string
+                          example: "USD"
+                    terms:
+                      type: array
+                      items:
+                        type: string
+                      example: ["Valid for one-time use only", "Must present coupon at time of service"]
+                  required: [name, address]
+                  additionalProperties: true
+                activityType:
+                  type: string
+                  enum: [hotel, restaurant, tour, transport, attraction, experience, shopping, entertainment]
+                  description: Type of activity the coupon is for
+                  example: "tour"
+                expirationDays:
+                  type: integer
+                  minimum: 1
+                  default: 365
+                  description: Number of days from now when the coupon expires
+                  example: 30
+              required: [userId, projectId, purchaseId, businessInfo, activityType]
+            examples:
+              tour_example:
+                summary: Adventure Tour Coupon
+                value:
+                  userId: "123e4567-e89b-12d3-a456-426614174000"
+                  projectId: "987fcdeb-51d2-43e8-b456-789012345678"
+                  purchaseId: 12345
+                  businessInfo:
+                    name: "Costa Rican Adventure Tours"
+                    address: "123 Jungle Road, Manuel Antonio, Costa Rica"
+                    region: "Central Pacific"
+                    discount:
+                      percentage: 15
+                    terms: ["Valid for one-time use only", "Advance booking required"]
+                  activityType: "tour"
+                  expirationDays: 30
+              restaurant_example:
+                summary: Restaurant Coupon
+                value:
+                  userId: "456e7890-e89b-12d3-a456-426614174000"
+                  projectId: "321fcdeb-51d2-43e8-b456-789012345678"
+                  purchaseId: 67890
+                  businessInfo:
+                    name: "Tropical Flavors Restaurant"
+                    address: "456 Beach Road, Tamarindo, Costa Rica"
+                    region: "Guanacaste"
+                    discount:
+                      amount: 20.00
+                      currency: "USD"
+                    terms: ["Valid for dinner only", "Cannot be combined with other offers"]
+                  activityType: "restaurant"
+                  expirationDays: 60
+      responses:
+        '201':
+          description: Coupon created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  couponId:
+                    type: string
+                    format: uuid
+                    description: Database ID of the created coupon
+                    example: "789e0123-e89b-12d3-a456-426614174000"
+                  tokenId:
+                    type: string
+                    description: Blockchain token ID for the NFT coupon
+                    example: "12345"
+                  metadataUrl:
+                    type: string
+                    format: uri
+                    description: IPFS URL containing the coupon metadata
+                    example: "https://ipfs.io/ipfs/QmExample123456789"
+                  expirationDate:
+                    type: string
+                    format: date-time
+                    description: ISO 8601 date when the coupon expires
+                    example: "2024-12-31T23:59:59.000Z"
+                  redemptionCode:
+                    type: string
+                    description: Unique code for coupon redemption
+                    example: "ABCD1234EFGH5678IJKL9012MNOP3456"
+                  contractAddress:
+                    type: string
+                    description: Soroban smart contract address
+                    example: "CBQHNAXSI55GX2GN6D67GK7BHVPSLJUGZQEU7WJ5LKR5PNUCGLIMAO4K"
+                  transactionHash:
+                    type: string
+                    description: Blockchain transaction hash for the mint operation
+                    example: "MINT_12345_ABCDEFGH"
+                required: [couponId, tokenId, metadataUrl, expirationDate, redemptionCode, contractAddress, transactionHash]
+              example:
+                couponId: "789e0123-e89b-12d3-a456-426614174000"
+                tokenId: "12345"
+                metadataUrl: "https://ipfs.io/ipfs/QmExample123456789"
+                expirationDate: "2024-12-31T23:59:59.000Z"
+                redemptionCode: "ABCD1234EFGH5678IJKL9012MNOP3456"
+                contractAddress: "CBQHNAXSI55GX2GN6D67GK7BHVPSLJUGZQEU7WJ5LKR5PNUCGLIMAO4K"
+                transactionHash: "MINT_12345_ABCDEFGH"
+        '400':
+          description: Bad Request - Invalid input data
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                validation_error:
+                  summary: Validation Error
+                  value:
+                    type: "urn:problem-type:bad-request"
+                    title: "Invalid request body"
+                    status: 400
+                    detail: "userId must be a valid UUID, businessInfo is required"
+                    instance: "/api/coupon/generate"
+        '401':
+          description: Unauthorized - User not authenticated or not authorized for this purchase
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                not_authenticated:
+                  summary: Not Authenticated
+                  value:
+                    type: "urn:problem-type:unauthorized"
+                    title: "Not allowed to generate coupon for this user"
+                    status: 401
+                    instance: "/api/coupon/generate"
+                purchase_not_owned:
+                  summary: Purchase Not Owned
+                  value:
+                    type: "urn:problem-type:unauthorized"
+                    title: "Purchase does not belong to user"
+                    status: 401
+                    instance: "/api/coupon/generate"
+        '404':
+          description: Not Found - User, project, or purchase not found or inactive
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                user_not_found:
+                  summary: User Not Found
+                  value:
+                    type: "urn:problem-type:not-found"
+                    title: "User not found or missing wallet"
+                    status: 404
+                    instance: "/api/coupon/generate"
+                project_inactive:
+                  summary: Project Inactive
+                  value:
+                    type: "urn:problem-type:not-found"
+                    title: "Project not found or inactive"
+                    status: 404
+                    instance: "/api/coupon/generate"
+        '409':
+          description: Conflict - Coupon already exists for this purchase
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              example:
+                type: "urn:problem-type:conflict"
+                title: "Coupon already exists for this purchase"
+                status: 409
+                instance: "/api/coupon/generate"
+        '502':
+          description: Bad Gateway - External service failure (IPFS or Soroban)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                ipfs_failure:
+                  summary: IPFS Upload Failed
+                  value:
+                    type: "urn:problem-type:bad-gateway"
+                    title: "Failed to upload metadata to IPFS"
+                    status: 502
+                    instance: "/api/coupon/generate"
+                soroban_failure:
+                  summary: Blockchain Mint Failed
+                  value:
+                    type: "urn:problem-type:bad-gateway"
+                    title: "Failed to mint coupon on blockchain"
+                    status: 502
+                    instance: "/api/coupon/generate"
+        '500':
+          description: Internal Server Error - Database or other internal failure
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              example:
+                type: "urn:problem-type:internal-server-error"
+                title: "Internal Server Error"
+                status: 500
+                instance: "/api/coupon/generate"
+
+components:
+  schemas:
+    ProblemDetails:
+      type: object
+      description: RFC 7807 Problem Details for HTTP APIs
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI reference that identifies the problem type
+        title:
+          type: string
+          description: A short, human-readable summary of the problem type
+        status:
+          type: integer
+          description: The HTTP status code
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence
+        instance:
+          type: string
+          format: uri
+          description: A URI reference that identifies the specific occurrence
+      required: [type, title, status]
