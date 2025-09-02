@@ -1,0 +1,91 @@
+{
+  "info": {
+    "name": "TreeByte Coupon Generation",
+    "description": "API tests for coupon generation endpoint",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Generate Tour Coupon - Success",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"projectId\": \"987fcdeb-51d2-43e8-b456-789012345678\",\n  \"purchaseId\": 12345,\n  \"businessInfo\": {\n    \"name\": \"Costa Rican Adventure Tours\",\n    \"address\": \"123 Jungle Road, Manuel Antonio, Costa Rica\",\n    \"region\": \"Central Pacific\",\n    \"discount\": {\n      \"percentage\": 15\n    },\n    \"terms\": [\n      \"Valid for one-time use only\",\n      \"Advance booking required\"\n    ]\n  },\n  \"activityType\": \"tour\",\n  \"expirationDays\": 30\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/coupon/generate",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "coupon", "generate"]
+        }
+      }
+    },
+    {
+      "name": "Generate Restaurant Coupon",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"456e7890-e89b-12d3-a456-426614174000\",\n  \"projectId\": \"321fcdeb-51d2-43e8-b456-789012345678\",\n  \"purchaseId\": 67890,\n  \"businessInfo\": {\n    \"name\": \"Tropical Flavors Restaurant\",\n    \"address\": \"456 Beach Road, Tamarindo, Costa Rica\",\n    \"region\": \"Guanacaste\",\n    \"discount\": {\n      \"amount\": 20.00,\n      \"currency\": \"USD\"\n    },\n    \"terms\": [\n      \"Valid for dinner only\",\n      \"Cannot be combined with other offers\"\n    ]\n  },\n  \"activityType\": \"restaurant\",\n  \"expirationDays\": 60\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/coupon/generate",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "coupon", "generate"]
+        }
+      }
+    },
+    {
+      "name": "Validation Error Test (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"invalid-uuid\",\n  \"projectId\": \"not-uuid\",\n  \"purchaseId\": \"not-number\",\n  \"businessInfo\": {},\n  \"activityType\": \"\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/coupon/generate",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "coupon", "generate"]
+        }
+      }
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": [""]
+        }
+      }
+    }
+  ]
+}
