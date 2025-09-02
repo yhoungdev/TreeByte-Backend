@@ -137,8 +137,18 @@ export enum ActivityType {
   ATTRACTION = 'attraction',
   EXPERIENCE = 'experience',
   SHOPPING = 'shopping',
-  ENTERTAINMENT = 'entertainment'
+  ENTERTAINMENT = 'entertainment',
+  ADVENTURE = 'adventure',
+  CULTURAL = 'cultural'
 }
+
+// Re-export types from coupon-metadata for compatibility
+export type { 
+  MetadataGenerationInput, 
+  CouponMetadata, 
+  MetadataValidationResult,
+  CouponAttribute 
+} from './coupon-metadata';
 
 export interface CouponWithRelations extends Coupon {
   user?: {
