@@ -18,6 +18,8 @@ export interface Project {
   asset_code: string;
   issuer_public_key: string;
   supply: number;
+  active: boolean;
+  website_url?: string | null;
   ipfs_url?: string | null;
   ipfs_hash?: string | null;
   contract_id?: string | null;
